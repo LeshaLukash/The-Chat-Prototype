@@ -1,0 +1,36 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://theme.tres" type="Theme" id=1]
+[ext_resource path="res://message.gd" type="Script" id=2]
+
+[node name="Message" type="Control"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+rect_min_size = Vector2( 50, 54 )
+theme = ExtResource( 1 )
+script = ExtResource( 2 )
+text = " "
+
+[node name="Panel" type="PanelContainer" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+margin_right = -669.0
+margin_bottom = -1226.0
+rect_min_size = Vector2( 51, 54 )
+
+[node name="Text" type="RichTextLabel" parent="Panel"]
+unique_name_in_owner = true
+margin_left = 7.0
+margin_top = 7.0
+margin_right = 44.0
+margin_bottom = 47.0
+rect_clip_content = false
+focus_mode = 2
+size_flags_horizontal = 3
+size_flags_vertical = 3
+bbcode_enabled = true
+bbcode_text = " [right][font=fonts/arial_time.tres]00:00[/font][/right]"
+text = " 00:00"
+fit_content_height = true
+scroll_active = false
+selection_enabled = true
