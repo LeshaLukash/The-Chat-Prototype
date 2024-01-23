@@ -4,22 +4,16 @@ extends PanelContainer
 # СООБЩЕНИЕ
 # Облачко с текстом сообщения
  
-const MESSAGE_MIN_SIZE_EMPTY := Vector2(51, 54)			# Мин. размер пустого сообщения без пометки
-const MESSAGE_MIN_SIZE_EDITED_EMPTY := Vector2(109, 54)	# Мин. размер пустого сообщения с пометкой
-const STRING_MAX_LENGTH := 500
+const MESSAGE_MIN_SIZE_EMPTY := Vector2(54, 58)			# Мин. размер пустого сообщения без пометки
+const MESSAGE_MIN_SIZE_EDITED_EMPTY := Vector2(122, 58)	# Мин. размер пустого сообщения с пометкой
+const STRING_MAX_LENGTH := 400
 const PANEL_ALIGN := 14 
 
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")
-export (String, MULTILINE) var message_text = "Пусть бегут неуклюже пешеходы по лужам а вода по асфальту рекой и неясно прохожим в этот день непогожий почему я весёлый такой а я играю на гармошке у прохожих на виду к сожалению день рождения только раз в году! Прилетит вдруг волшебник в голубом вертолёте и бесплатно покажет кино с днём рожденья поздравит и наверно оставит мне в подарок пятьсот эскимо! А я играю на гармошке у прохожих на виду" setget set_message_text		# Текст сообщения
+export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")
+export (String, MULTILINE) var message_text setget set_message_text		# Текст сообщения
 export (String) var message_time = "00:00" setget set_message_time		# Время отправки
 export (bool) var is_edited = false setget set_edited	# Пометка сообщения "изменено"
-
-onready var regex := RegEx.new()
-
-
-func _ready():
-	regex.compile("\\s+(\\S+)$")
-
 
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
@@ -41,7 +35,6 @@ func update_message() -> void:
 	else:
 		# rect_size.y не трогаем, т.к. его размеры меняет сам RichTextLabel
 		rect_size.x = get_string_pixel_length(get_longest_text_line(message_text)) + PANEL_ALIGN
-	
 	# Записываем текст и время в поле сообщения
 	$Text.bbcode_text = message_text + time_tags_start + time_formatted + time_tags_end
 
@@ -53,11 +46,19 @@ func is_containing_too_long_lines(text: String) -> bool:
 
 # Вычленяем из длинной строки подстроку, после которой нужно поставить перенос
 func find_break_pos_substr(line: String) -> String:
-	var result: String = line
+	var result: String = ""
+	var line_split = line.split(" ")
+	var i := 0
+	
+	if get_string_pixel_length(line_split[i]) > STRING_MAX_LENGTH:
+		result = line_split[i]
+		while get_string_pixel_length(result) > STRING_MAX_LENGTH:
+			result = result.substr(0, result.length() - 1)
+	else:
+		while get_string_pixel_length(result + line_split[i]) <= STRING_MAX_LENGTH:
+			result += line_split[i] + " "
+			i += 1
 
-	while get_string_pixel_length(result) > STRING_MAX_LENGTH:
-		print(regex.search(result).get_string())
-		result = result.substr(0, result.length() - 1)
 	return result
 	
 
@@ -94,15 +95,16 @@ func get_longest_text_line(text: String) -> String:
 		else:
 			test_line = text.substr(prev_line_break_pos, substr_length) # Возвращается строка, не включающая последний символ номером substr_length!
 		
-		if longest_line.length() < test_line.length():
+		if longest_line.length() <= test_line.length():
 			longest_line = test_line
 			
 		prev_line_break_pos = next_line_break_pos + 1 	# на единицу больше, т.к. next_line_break_pos хотим искать мимо предыдущего prev_line_break_pos
 														# иначе при поиске будет находить сноску под номером prev_line_break_pos
+	print("longest line: " + longest_line)
 	return longest_line
 
 
-# Удалить в начале строк пробелы, возникшие после её переноса
+# Удалить по краям строк пробелы, возникшие после её переноса
 func clean_start_spaces(text: String) -> String:
 	var prev_line_break_pos := 0	# Номер предыдущего переноса
 	var next_line_break_pos := 0	# Номер следующего переноса
@@ -122,8 +124,9 @@ func clean_start_spaces(text: String) -> String:
 		prev_line_break_pos = next_line_break_pos + 1 	# на единицу больше, т.к. next_line_break_pos хотим искать мимо предыдущего prev_line_break_pos
 														# иначе при поиске будет находить сноску под номером prev_line_break_pos
 		
-		# Удаляем в начале каждой строки пробел, если он есть
-		cleaned_line = test_line.trim_prefix(' ')
+		# Удаляем по краям каждой строки пробелы, если они есть
+		cleaned_line = test_line.trim_prefix(" ")
+		cleaned_line = cleaned_line.trim_suffix(" ")
 		text = text.replace(test_line, cleaned_line)
 	return text
 
@@ -131,8 +134,9 @@ func clean_start_spaces(text: String) -> String:
 func set_message_text(value: String):
 	# Расстановка переносов в строках, превышающих максимальную длину
 	while is_containing_too_long_lines(value):
+		var string_to_break: String = find_break_pos_substr(get_longest_text_line(value))
 		# Позиция, куда ставить перенос = начало строки, где нужен перенос + её длина
-		var pos_inser_break: int = value.find(find_break_pos_substr(get_longest_text_line(value))) + find_break_pos_substr(get_longest_text_line(value)).length()
+		var pos_inser_break: int = value.find(string_to_break) + string_to_break.length()
 		value = value.insert(pos_inser_break, '\n')
 	
 	message_text = clean_start_spaces(value)
