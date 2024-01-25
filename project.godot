@@ -11,7 +11,7 @@ config_version=4
 [application]
 
 config/name="The Chat Prototype"
-run/main_scene="res://main.tscn"
+run/main_scene="res://message.tscn"
 config/icon="res://icon.png"
 
 [display]

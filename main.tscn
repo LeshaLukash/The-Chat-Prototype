@@ -9,83 +9,36 @@ anchor_bottom = 1.0
 theme = ExtResource( 1 )
 
 [node name="VScrollBar" type="ScrollContainer" parent="."]
-margin_right = 597.0
-margin_bottom = 800.0
+anchor_right = 1.0
+anchor_bottom = 1.0
+scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VScrollBar"]
-margin_right = 597.0
-margin_bottom = 412.0
-size_flags_horizontal = 3
-
-[node name="MarginContainer" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_right = 597.0
-margin_bottom = 58.0
-custom_constants/margin_right = 506
-
-[node name="Message" parent="VScrollBar/VBoxContainer/MarginContainer" instance=ExtResource( 2 )]
-margin_right = 91.0
-message_text = "ебалово!"
-
-[node name="MarginContainer2" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_top = 62.0
-margin_right = 597.0
-margin_bottom = 120.0
-custom_constants/margin_right = 226
-
-[node name="Message2" parent="VScrollBar/VBoxContainer/MarginContainer2" instance=ExtResource( 2 )]
-margin_right = 371.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-message_text = "ёбаный врот этого кащино бля это пиздес"
-
-[node name="MarginContainer3" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_top = 124.0
-margin_right = 597.0
+margin_right = 600.0
 margin_bottom = 204.0
-custom_constants/margin_right = 187
-
-[node name="Message2" parent="VScrollBar/VBoxContainer/MarginContainer3" instance=ExtResource( 2 )]
-margin_right = 410.0
-margin_bottom = 80.0
 size_flags_horizontal = 3
-size_flags_vertical = 3
-message_text = "нужно маржевые контейнеры вручнуб править
-иначе никак"
 
-[node name="MarginContainer4" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_top = 208.0
-margin_right = 597.0
-margin_bottom = 266.0
-custom_constants/margin_right = 301
+[node name="Message" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_right = 600.0
+rect_min_size = Vector2( 122, 58 )
+custom_constants/margin_right = 393
+message_text = "текст настраиваем збс"
+message_time = "09:56"
+is_edited = true
 
-[node name="Message2" parent="VScrollBar/VBoxContainer/MarginContainer4" instance=ExtResource( 2 )]
-margin_right = 296.0
-size_flags_horizontal = 3
-size_flags_vertical = 3
-message_text = "но хотя бы так, решение найдено"
+[node name="Message2" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 62.0
+margin_right = 600.0
+margin_bottom = 142.0
+custom_constants/margin_right = 247
+message_text = "но теперь было бы балдёжно научиться
+считать маржу сообщений, иначе..."
+message_time = "10:23"
 
-[node name="MarginContainer5" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_top = 270.0
-margin_right = 597.0
-margin_bottom = 328.0
-custom_constants/margin_left = 228
-
-[node name="Message2" parent="VScrollBar/VBoxContainer/MarginContainer5" instance=ExtResource( 2 )]
-margin_left = 228.0
-margin_right = 597.0
-size_flags_vertical = 3
-message_text = "но как реализовывать ответные реплики?"
-
-[node name="MarginContainer6" type="MarginContainer" parent="VScrollBar/VBoxContainer"]
-margin_top = 332.0
-margin_right = 597.0
-margin_bottom = 412.0
-custom_constants/margin_left = 245
-
-[node name="Message2" parent="VScrollBar/VBoxContainer/MarginContainer6" instance=ExtResource( 2 )]
-margin_left = 245.0
-margin_right = 597.0
-margin_bottom = 80.0
-size_flags_vertical = 3
-message_text = "угу, крутя ползунки маржин редактора в
-другую сторону, понял"
+[node name="Message3" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 146.0
+margin_right = 600.0
+margin_bottom = 204.0
+custom_constants/margin_right = 234
+message_text = "иначе придётся править размеры самому"
+message_time = "10:23"
