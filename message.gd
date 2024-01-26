@@ -4,8 +4,8 @@ extends MarginContainer
 ## СООБЩЕНИЕ
 # Облачко с текстом сообщения
  
-const MIN_SIZE_EMPTY := Vector2(54, 58)			# Мин. размер пустого сообщения без пометки
-const MIN_SIZE_EDITED_EMPTY := Vector2(122, 58)	# Мин. размер пустого сообщения с пометкой
+const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)			# Мин. размер пустого сообщения без пометки
+const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
 
@@ -33,7 +33,7 @@ func update_message() -> void:
 
 # Вписываем текст сообщения в облако сообщения
 func format_msg_text(text: String) -> String:
-	var result: String = ""
+	var result := ""
 	var text_lines: PoolStringArray = text.split('\n')
 	
 	for i in text_lines.size():
@@ -50,29 +50,42 @@ func format_msg_text(text: String) -> String:
 		# Если строка не последняя - добавляем знак переноса
 		if i != text_lines.size() - 1:
 			result += '\n'
+
 	return result
 
 
 # Разбить большую строку на строки поменьше
 func format_line(line: String) -> Array:
-	if get_line_pixel_length(line) <= LINE_MAX_LENGTH:
-		return [line]
-	
 	var result := []
 	var line_words: PoolStringArray = line.split(' ')
+	var string := "" # Хранит промежуточные этапы разбиения
 	
-	for i in line_words:
-		var string := ""
-		var word: String = line_words[i]
-		
-		# Разбиваем спам буквами на подслова
+	for word in line_words:
 		if word.length() > WORD_MAX_LENGTH:
-			for j in word.length():
-				while get_line_pixel_length(string + word[j]) <= LINE_MAX_LENGTH:
-					string += word[j]
-				result.append(string)
-				string = ""
+			for i in word.length():
+				var ch: String = word[i]
+				
+				if get_line_pixel_length(string + ch) <= LINE_MAX_LENGTH:
+					string += ch
+					if i == word.length() - 1: # Если буква - последняя
+						if get_line_pixel_length(string + ' ') <= LINE_MAX_LENGTH:
+							string += ' '
+						result.append(string)
+				else:
+					string += '\n'
+					result.append(string)
+					string = ch
+		elif get_line_pixel_length(string + word) <= LINE_MAX_LENGTH:
+			string += word
+			if get_line_pixel_length(string + ' ') <= LINE_MAX_LENGTH:
+				string += ' '
+		else:
+			string = string.trim_suffix(' ')
+			string += '\n'
+			result.append(string)
+			string = word + ' '
 	
+	result[-1] = result[-1].trim_suffix('\n')
 	return result
 
 
@@ -97,9 +110,9 @@ func get_longest_text_line(text: String) -> String:
 		return text
 	
 	var text_lines: PoolStringArray = text.split('\n') # Разбиваем текст построчно, заносим в массив
-	var text_lines_sizes: Array = [] 
+	var text_lines_sizes := [] 
 	
-	# Заполняем массив значениями длин строк (в пикселях!) исходного текста
+	# Заполняем массив значениями длин (в пикселях!) строк исходного текста
 	for line in text_lines:
 		text_lines_sizes.append(get_line_pixel_length(line))
 	
@@ -111,6 +124,10 @@ func get_longest_text_line(text: String) -> String:
 
 func set_message_text(value: String):
 	message_text = value
+	
+	var formatted_line := format_msg_text(message_text)
+	print(formatted_line)
+	
 	update_message()
 
 
@@ -126,7 +143,7 @@ func set_edited(value: bool):
 	is_edited = value
 	
 	if is_edited:
-		rect_min_size = MIN_SIZE_EDITED_EMPTY
+		rect_min_size = PANEL_MIN_SIZE_EDITED
 	else:
-		rect_min_size = MIN_SIZE_EMPTY
+		rect_min_size = PANEL_MIN_SIZE_EMPTY
 	update_message()
