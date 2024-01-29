@@ -15,30 +15,43 @@ scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VScrollBar"]
 margin_right = 600.0
-margin_bottom = 204.0
+margin_bottom = 350.0
 size_flags_horizontal = 3
 
 [node name="Message" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
 margin_right = 600.0
-rect_min_size = Vector2( 122, 58 )
-custom_constants/margin_right = 393
-message_text = "текст настраиваем збс"
+custom_constants/margin_right = 494
+message_text = "нихуя себе"
 message_time = "09:56"
-is_edited = true
 
 [node name="Message2" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
 margin_top = 62.0
 margin_right = 600.0
-margin_bottom = 142.0
-custom_constants/margin_right = 247
-message_text = "но теперь было бы балдёжно научиться
-считать маржу сообщений, иначе..."
-message_time = "10:23"
+margin_bottom = 120.0
+custom_constants/margin_right = 392
+message_text = "похоже работает почти"
+message_time = "09:56"
 
 [node name="Message3" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
-margin_top = 146.0
+margin_top = 124.0
 margin_right = 600.0
 margin_bottom = 204.0
-custom_constants/margin_right = 234
-message_text = "иначе придётся править размеры самому"
-message_time = "10:23"
+custom_constants/margin_right = 207
+message_text = "забавно что скрипт пересччитывает размеры всех сообщений"
+message_time = "09:56"
+
+[node name="Message4" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 208.0
+margin_right = 600.0
+margin_bottom = 288.0
+custom_constants/margin_right = 270
+message_text = "но при этом всегда пересчитывает их индивидуально"
+message_time = "09:56"
+
+[node name="Message5" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 292.0
+margin_right = 600.0
+margin_bottom = 350.0
+custom_constants/margin_left = 355
+message_text = "и что это должно значить,"
+message_time = "09:56"

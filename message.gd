@@ -2,12 +2,13 @@ tool
 extends MarginContainer
 
 ## СООБЩЕНИЕ
-# Облачко с текстом сообщения
+# Поле с текстом сообщения
  
 const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)			# Мин. размер пустого сообщения без пометки
 const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
+const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
 
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")			# Шрифт сообщения
 export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")	# Шрифт времени отправки
@@ -18,21 +19,46 @@ export (bool) var is_edited = false setget set_edited								# Пометка с
 
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
-
-	# Подгоняем размеры сообщения под размеры текста (самой длинной строки)
+	
+	# Рассчитываем параметры текста
+	var text_formatted: String = format_message(message_text)
+	var longest_line: String = get_longest_text_line(text_formatted)
+	# warning-ignore:narrowing_conversion
+	var longest_line_length: int = get_line_pixel_length(longest_line)
+	
+	# Рассчитываем параметры приписки о времени
+	var time_tags_start := "[right][font=fonts/arial_time.tres]"
+	var time_tags_end := "[/font][/right]"
+	var time_formatted: String
+	# warning-ignore:unused_variable
+	var message_time_length: int
+	
+	if is_edited:
+		time_formatted = time_tags_start + message_time + ", изменено" + time_tags_end
+		# warning-ignore:narrowing_conversion
+		message_time_length = get_line_pixel_length(message_time + ", изменено", message_time_font)
+	else:
+		time_formatted = time_tags_start + message_time + time_tags_end
+		# warning-ignore:narrowing_conversion
+		message_time_length = get_line_pixel_length(message_time, message_time_font)
+	
+	# Задаём размеры поля сообщения
 	if message_text.empty():
 		rect_size = rect_min_size
 	else:
-		rect_size.x = get_line_pixel_length(message_text)
+		rect_size.x = longest_line_length + 14
 	
 	# Записываем текст и время в поле сообщения
-	var time_tags_start := "[right][font=fonts/arial_time.tres]"
-	var time_tags_end := "[/font][/right]"
-	$Panel/Text.bbcode_text = message_text + time_tags_start + message_time + time_tags_end
+	$Panel/Text.bbcode_text = text_formatted + time_formatted
 
+	if get_owner() != null:
+		add_constant_override("margin_right", 600 - longest_line_length - PANEL_ALIGN)
 
 # Вписываем текст сообщения в облако сообщения
-func format_msg_text(text: String) -> String:
+func format_message(text: String) -> String:
+	if text == "":
+		return text
+	
 	var result := ""
 	var text_lines: PoolStringArray = text.split('\n')
 	
@@ -41,51 +67,52 @@ func format_msg_text(text: String) -> String:
 		
 		# Если текущая строка не слишком длинная
 		if get_line_pixel_length(line) <= LINE_MAX_LENGTH:
-			result += line
+			result += line + '\n'
+		# Если строка слишком длинная
 		else:
 			var line_split: Array = format_line(line)
 			for string in line_split:
-				result += string # В конце всех строк, кроме последней, перенос будет стоять
-		
-		# Если строка не последняя - добавляем знак переноса
-		if i != text_lines.size() - 1:
-			result += '\n'
-
+				result += string + '\n'
 	return result
 
 
-# Разбить большую строку на строки поменьше
+# Разбить большую строку на строки поменьше (без переносов!)
 func format_line(line: String) -> Array:
 	var result := []
 	var line_words: PoolStringArray = line.split(' ')
-	var string := "" # Хранит промежуточные этапы разбиения
+	var last_word_idx: int = line_words.size() - 1 # Индекс последнего слова
 	
-	for word in line_words:
-		if word.length() > WORD_MAX_LENGTH:
-			for i in word.length():
-				var ch: String = word[i]
+	var string := "" # Хранит промежуточные этапы разбиения
+	for i in line_words.size():
+		var word: String = line_words[i]
+		
+		# Если текущее слово сликом длинное (вероятно, спам букв)
+		if word.length() > WORD_MAX_LENGTH: 
+			for j in word.length():
+				var letter: String = word[j]
 				
-				if get_line_pixel_length(string + ch) <= LINE_MAX_LENGTH:
-					string += ch
-					if i == word.length() - 1: # Если буква - последняя
-						if get_line_pixel_length(string + ' ') <= LINE_MAX_LENGTH:
-							string += ' '
-						result.append(string)
+				if get_line_pixel_length(string + letter) <= LINE_MAX_LENGTH:
+					string += letter
 				else:
-					string += '\n'
 					result.append(string)
-					string = ch
+					string = letter
+		# Пытаемся вместить слово с пробелом после него
+		elif get_line_pixel_length(string + word + ' ') <= LINE_MAX_LENGTH:
+			string += word + ' '
+		# Пытаемся вместить слово без пробела после него
+		# Слово последним будет в этой строке, поэтому после отдаём её
 		elif get_line_pixel_length(string + word) <= LINE_MAX_LENGTH:
 			string += word
-			if get_line_pixel_length(string + ' ') <= LINE_MAX_LENGTH:
-				string += ' '
-		else:
-			string = string.trim_suffix(' ')
-			string += '\n'
 			result.append(string)
+			string = ""
+		# Если даже и слово не влазит - оставляем его для новой строки
+		else:
+			result.append(string.trim_suffix(' '))
 			string = word + ' '
-	
-	result[-1] = result[-1].trim_suffix('\n')
+		
+		# Не забываем забрать незаконченые строки
+		if i == last_word_idx:
+			result.append(string.trim_suffix(' '))
 	return result
 
 
@@ -95,8 +122,8 @@ func contains_long_lines(text: String) -> bool:
 
 
 # Получить длину строки сообщения в пикселях, относительно заданого шрифта
-func get_line_pixel_length(string: String) -> float:
-	return message_font.get_string_size(string).x
+func get_line_pixel_length(string: String, font := message_font) -> float:
+	return font.get_string_size(string).x
 
 
 # Получить число строк в сообщении
@@ -122,19 +149,13 @@ func get_longest_text_line(text: String) -> String:
 	return result
 
 
+## СЕТТЕРЫ/ГЕТТЕРЫ
 func set_message_text(value: String):
 	message_text = value
-	
-	var formatted_line := format_msg_text(message_text)
-	print(formatted_line)
-	
 	update_message()
 
 
 func set_message_time(value: String):
-	if is_edited:
-		value += ", изменено"
-	
 	message_time = value
 	update_message()
 
@@ -142,8 +163,10 @@ func set_message_time(value: String):
 func set_edited(value: bool):
 	is_edited = value
 	
+	# Задаём минимальный размер собщения
 	if is_edited:
 		rect_min_size = PANEL_MIN_SIZE_EDITED
 	else:
 		rect_min_size = PANEL_MIN_SIZE_EMPTY
+	
 	update_message()
