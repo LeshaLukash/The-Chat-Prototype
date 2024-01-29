@@ -3,7 +3,7 @@
 [ext_resource path="res://theme.tres" type="Theme" id=1]
 [ext_resource path="res://message.tscn" type="PackedScene" id=2]
 
-[node name="Main" type="Control"]
+[node name="Chat" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
 theme = ExtResource( 1 )
@@ -28,9 +28,11 @@ message_time = "09:56"
 margin_top = 62.0
 margin_right = 600.0
 margin_bottom = 120.0
-custom_constants/margin_right = 392
-message_text = "похоже работает почти"
+rect_min_size = Vector2( 122, 58 )
+custom_constants/margin_right = 388
+message_text = "похоже работает, почти"
 message_time = "09:56"
+is_edited = true
 
 [node name="Message3" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
 margin_top = 124.0
@@ -52,6 +54,7 @@ message_time = "09:56"
 margin_top = 292.0
 margin_right = 600.0
 margin_bottom = 350.0
-custom_constants/margin_left = 355
-message_text = "и что это должно значить,"
+custom_constants/margin_right = 0
+custom_constants/margin_left = 364
+message_text = "и что это должно значить?"
 message_time = "09:56"
