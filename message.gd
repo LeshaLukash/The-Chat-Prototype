@@ -15,7 +15,7 @@ export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tre
 export (String, MULTILINE) var message_text setget set_message_text					# Текст сообщения
 export (String) var message_time = "00:00" setget set_message_time					# Время отправки
 export (bool) var is_edited = false setget set_edited								# Пометка сообщения "изменено"
-
+export (bool) var is_reply = false setget set_reply									# Является ли сообщение ответом
 
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
@@ -52,8 +52,13 @@ func update_message() -> void:
 	$Panel/Text.bbcode_text = text_formatted + time_formatted
 
 	if get_owner() != null:
-		add_constant_override("margin_right", 600 - longest_line_length - PANEL_ALIGN)
-
+		if is_reply:
+			add_constant_override("margin_right", 0)
+			add_constant_override("margin_left", clamp(600 - longest_line_length - PANEL_ALIGN, 54, 546))
+		else:
+			add_constant_override("margin_right", clamp(600 - longest_line_length - PANEL_ALIGN, 54, 546))
+			remove_constant_override("margin_left")
+			
 # Вписываем текст сообщения в облако сообщения
 func format_message(text: String) -> String:
 	if text == "":
@@ -169,4 +174,9 @@ func set_edited(value: bool):
 	else:
 		rect_min_size = PANEL_MIN_SIZE_EMPTY
 	
+	update_message()
+
+
+func set_reply(value: bool):
+	is_reply = value
 	update_message()

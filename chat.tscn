@@ -15,7 +15,7 @@ scroll_horizontal_enabled = false
 
 [node name="VBoxContainer" type="VBoxContainer" parent="VScrollBar"]
 margin_right = 600.0
-margin_bottom = 350.0
+margin_bottom = 602.0
 size_flags_horizontal = 3
 
 [node name="Message" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
@@ -58,3 +58,34 @@ custom_constants/margin_right = 0
 custom_constants/margin_left = 364
 message_text = "и что это должно значить?"
 message_time = "09:56"
+is_reply = true
+
+[node name="Message6" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 354.0
+margin_right = 600.0
+margin_bottom = 434.0
+custom_constants/margin_right = 0
+custom_constants/margin_left = 191
+message_text = "бля погодь я теперь могу добавлять ответы по щелчку мыши"
+message_time = "09:56"
+is_reply = true
+
+[node name="Message7" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 438.0
+margin_right = 600.0
+margin_bottom = 496.0
+custom_constants/margin_right = 0
+custom_constants/margin_left = 389
+message_text = "не ебясь с константами"
+message_time = "09:56"
+is_reply = true
+
+[node name="Message8" parent="VScrollBar/VBoxContainer" instance=ExtResource( 2 )]
+margin_top = 500.0
+margin_right = 600.0
+margin_bottom = 602.0
+rect_min_size = Vector2( 122, 58 )
+custom_constants/margin_right = 277
+message_text = "охуенно, осталось только поправить минимальные размеры сообщения в заввисимости от пометки \"is edited\""
+message_time = "09:56"
+is_edited = true
