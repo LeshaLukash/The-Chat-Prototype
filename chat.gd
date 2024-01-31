@@ -29,8 +29,8 @@ func load_chat(file_path: String = chat_text_file) -> void:
 	
 	# Извлекаем данные из файла
 	while f.get_position() < f.get_len():
-		var msg_line: String = f.get_line()
-		
+		var msg_line: String = f.get_line().c_unescape()
+		print(msg_line)
 		# Если не хватает строки с параметрами - сбрасываем чат
 		if f.eof_reached():
 			clear_chat()
