@@ -1,4 +1,5 @@
 tool
+class_name Message
 extends MarginContainer
 
 ## СООБЩЕНИЕ
@@ -18,6 +19,14 @@ export (String) var message_time = "00:00" setget set_message_time					# Вре�
 export (bool) var is_edited = false setget set_edited								# Пометка сообщения "изменено"
 export (bool) var is_reply = false setget set_reply									# Является ли сообщение ответом
 
+var longest_line_length := 0 # Длина самой длинной строки
+
+func init_message(text: String, params: Array) -> void:
+	message_time = params[0]
+	is_edited = params[1]
+	is_reply = params[2]
+	message_text = text
+
 
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
@@ -25,7 +34,8 @@ func update_message() -> void:
 	# Рассчитываем параметры текста
 	var text_formatted: String = format_message(message_text)
 	var longest_line: String = get_longest_text_line(text_formatted)
-	var longest_line_length: int = get_line_pixel_length(longest_line)
+	
+	longest_line_length = get_line_pixel_length(longest_line)
 	
 	# Рассчитываем параметры приписки о времени
 	var time_tags_start := "[right][font=fonts/arial_time.tres]"
@@ -45,13 +55,11 @@ func update_message() -> void:
 	
 	# Записываем текст и время в поле сообщения
 	$Panel/Text.bbcode_text = text_formatted + time_formatted
-	if get_owner() != null:
-		update_margins(longest_line_length)
 
 
 # Если сообщение добавлено в контейнер - изменяем его размер,
 # управляя константами MarginContainer
-func update_margins(longest_line_length: int):
+func update_margins():
 	var game_screen_width: float = get_viewport_rect().size.x
 	
 	var margin_border_min: int
@@ -165,14 +173,17 @@ func get_longest_text_line(text: String) -> String:
 	if get_lines_count(text) == 1:
 		return text
 	
-	var text_lines: PoolStringArray = text.split('\n') # Разбиваем текст построчно, заносим в массив
+	# Разбиваем текст построчно, заносим в массив
+	var text_lines: PoolStringArray = text.split('\n') 
+	
 	var text_lines_sizes := [] 
 	
 	# Заполняем массив значениями длин (в пикселях!) строк исходного текста
 	for line in text_lines:
 		text_lines_sizes.append(get_line_pixel_length(line))
 	
-	var text_line_long_idx: int = text_lines_sizes.find(text_lines_sizes.max()) # Индекс первой самой длинной строки
+	# Индекс первой самой длинной строки
+	var text_line_long_idx: int = text_lines_sizes.find(text_lines_sizes.max()) 
 	
 	var result: String = text_lines[text_line_long_idx]
 	return result
