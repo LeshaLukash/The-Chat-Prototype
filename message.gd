@@ -3,12 +3,13 @@ extends MarginContainer
 
 ## СООБЩЕНИЕ
 # Поле с текстом сообщения
- 
-const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)			# Мин. размер пустого сообщения без пометки
-const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения с пометкой
+
+const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)	# Мин. размер пустого сообщения, без пометки
+const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения, с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
 const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
+const SCROLL_LINE_WIDTH := 12					# Ширина (в пикселях) линии прокрутки сообщений
 
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")			# Шрифт сообщения
 export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")	# Шрифт времени отправки
@@ -17,48 +18,71 @@ export (String) var message_time = "00:00" setget set_message_time					# Вре�
 export (bool) var is_edited = false setget set_edited								# Пометка сообщения "изменено"
 export (bool) var is_reply = false setget set_reply									# Является ли сообщение ответом
 
+
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
 	
 	# Рассчитываем параметры текста
 	var text_formatted: String = format_message(message_text)
 	var longest_line: String = get_longest_text_line(text_formatted)
-	# warning-ignore:narrowing_conversion
 	var longest_line_length: int = get_line_pixel_length(longest_line)
 	
 	# Рассчитываем параметры приписки о времени
 	var time_tags_start := "[right][font=fonts/arial_time.tres]"
 	var time_tags_end := "[/font][/right]"
 	var time_formatted: String
-	# warning-ignore:unused_variable
-	var message_time_length: int
 	
 	if is_edited:
 		time_formatted = time_tags_start + message_time + ", изменено" + time_tags_end
-		# warning-ignore:narrowing_conversion
-		message_time_length = get_line_pixel_length(message_time + ", изменено", message_time_font)
 	else:
 		time_formatted = time_tags_start + message_time + time_tags_end
-		# warning-ignore:narrowing_conversion
-		message_time_length = get_line_pixel_length(message_time, message_time_font)
 	
 	# Задаём размеры поля сообщения
 	if message_text.empty():
 		rect_size = rect_min_size
 	else:
-		rect_size.x = longest_line_length + 14
+		rect_size.x = longest_line_length + PANEL_ALIGN
 	
 	# Записываем текст и время в поле сообщения
 	$Panel/Text.bbcode_text = text_formatted + time_formatted
-
 	if get_owner() != null:
-		if is_reply:
-			add_constant_override("margin_right", 0)
-			add_constant_override("margin_left", clamp(600 - longest_line_length - PANEL_ALIGN, 54, 546))
-		else:
-			add_constant_override("margin_right", clamp(600 - longest_line_length - PANEL_ALIGN, 54, 546))
-			remove_constant_override("margin_left")
-			
+		update_margins(longest_line_length)
+
+
+# Если сообщение добавлено в контейнер - изменяем его размер,
+# управляя константами MarginContainer
+func update_margins(longest_line_length: int):
+	var game_screen_width: float = get_viewport_rect().size.x
+	
+	var margin_border_min: int
+	var margin_border_max: int
+	# warning-ignore:narrowing_conversion
+	var margin_border_current: int = game_screen_width - longest_line_length -\
+			PANEL_ALIGN - SCROLL_LINE_WIDTH
+		
+	if is_edited:
+		# warning-ignore:narrowing_conversion
+		margin_border_min = PANEL_MIN_SIZE_EDITED.x + SCROLL_LINE_WIDTH
+		# warning-ignore:narrowing_conversion
+		margin_border_max = game_screen_width - PANEL_MIN_SIZE_EDITED.x - SCROLL_LINE_WIDTH
+	else:
+		# warning-ignore:narrowing_conversion
+		margin_border_min = PANEL_MIN_SIZE_EMPTY.x
+		# warning-ignore:narrowing_conversion
+		margin_border_max = game_screen_width - PANEL_MIN_SIZE_EMPTY.x - SCROLL_LINE_WIDTH
+	
+	if is_reply:
+		add_constant_override("margin_right", 0)
+		# warning-ignore:narrowing_conversion
+		add_constant_override("margin_left", clamp(margin_border_current,
+				margin_border_min, margin_border_max))
+	else:
+		# warning-ignore:narrowing_conversion
+		add_constant_override("margin_right", clamp(margin_border_current,
+				margin_border_min, margin_border_max))
+		remove_constant_override("margin_left")
+
+
 # Вписываем текст сообщения в облако сообщения
 func format_message(text: String) -> String:
 	if text == "":
@@ -127,7 +151,7 @@ func contains_long_lines(text: String) -> bool:
 
 
 # Получить длину строки сообщения в пикселях, относительно заданого шрифта
-func get_line_pixel_length(string: String, font := message_font) -> float:
+func get_line_pixel_length(string: String, font := message_font) -> int:
 	return font.get_string_size(string).x
 
 
