@@ -16,36 +16,40 @@ func _ready():
 	load_chat(chat_text_file)
 
 
+# Загрузить чат из текстового файла, расположенного по пути chat_text_file
+# Первой строкой идёт текст сообщения
+# Второй - параметры сообщения
 func load_chat(file_path: String = chat_text_file) -> void:
 	clear_chat()
 	var f = File.new()
 	
 	if not f.file_exists(file_path):
-		print("Файл %s отсутствует!" %file_path)
+		printerr("Файл %s отсутствует!" %file_path)
 		return
-	
+
+	# Извлекаем данные из файла	
 	f.open(file_path, File.READ)
-	
-	
-	# Извлекаем данные из файла
 	while f.get_position() < f.get_len():
+		# Считываем строку сообщения с учётом escape sequence's
 		var msg_line: String = f.get_line().c_unescape()
-		print(msg_line)
+		
 		# Если не хватает строки с параметрами - сбрасываем чат
 		if f.eof_reached():
 			clear_chat()
-			print("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
+			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
 			return
 		
+		# Считываем строку с параметрами сообщения
 		var params_line: String = f.get_line()
 		var msg_params: Array = get_params(params_line)
 		
 		# Если строка с параметрами имеет не три параметра - сбрасыываем чат
 		if msg_params.size() != PARAMS_COUNT:
 			clear_chat()
-			print("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
+			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
 			return
 		
+		# Добавляем сообщение
 		var msg = m.instance()
 		msg.add_to_group(GROUP_MESSAGES)
 		msg.init_message(msg_line, msg_params)
