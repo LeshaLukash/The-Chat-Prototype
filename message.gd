@@ -12,19 +12,34 @@ const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русск
 const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
 const SCROLL_LINE_WIDTH := 12					# Ширина (в пикселях) линии прокрутки сообщений
 
-export (DynamicFont) var message_font = preload("res://fonts/arial.tres")			# Шрифт сообщения
-export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")	# Шрифт времени отправки
-export (String, MULTILINE) var message_text setget set_message_text					# Текст сообщения
-export (String) var message_time = "00:00" setget set_message_time					# Время отправки
-export (bool) var is_edited = false setget set_edited								# Пометка сообщения "изменено"
-export (bool) var is_reply = false setget set_reply									# Является ли сообщение ответом
+const TIME_TAGS_START := "[right][font=fonts/arial_time.tres]"
+const TIME_TAGS_END := "[/font][/right]"
+const NAME_TAGS_START := "[color=silver][font=fonts/arial_sender_name.tres]"
+const NAME_TAGS_END := "[/font][/color]"
+
+export (String) var message_sender = "Отправитель" setget set_message_sender					# Имя отправителя
+export (DynamicFont) var message_sender_font = preload("res://fonts/arial_sender_name.tres")	# Шрифт имени отправителя
+export (DynamicFont) var message_font = preload("res://fonts/arial.tres")						# Шрифт сообщения
+export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")				# Шрифт времени отправки
+export (String, MULTILINE) var message_text setget set_message_text								# Текст сообщения
+export (String) var message_time = "00:00" setget set_message_time								# Время отправки
+export (bool) var is_edited = false setget set_edited											# Пометка сообщения "изменено"
+export (bool) var is_reply = false setget set_reply												# Является ли сообщение ответом
 
 var longest_line_length := 0 # Длина самой длинной строки
 
+
 func init_message(text: String, params: Array) -> void:
-	message_time = params[0]
-	is_edited = params[1]
-	is_reply = params[2]
+	message_time = params[1]
+	is_edited = params[2]
+	
+	# Если сообщение от главного героя - его имя не выводится
+	is_reply = params[3]
+	if is_reply:
+		message_sender = ""
+	else:
+		message_sender = params[0]
+
 	message_text = text
 
 
@@ -38,23 +53,43 @@ func update_message() -> void:
 	longest_line_length = get_line_pixel_length(longest_line)
 	
 	# Рассчитываем параметры приписки о времени
-	var time_tags_start := "[right][font=fonts/arial_time.tres]"
-	var time_tags_end := "[/font][/right]"
 	var time_formatted: String
-	
 	if is_edited:
-		time_formatted = time_tags_start + message_time + ", изменено" + time_tags_end
+		time_formatted = TIME_TAGS_START + message_time + ", изменено" + TIME_TAGS_END
 	else:
-		time_formatted = time_tags_start + message_time + time_tags_end
+		time_formatted = TIME_TAGS_START + message_time + TIME_TAGS_END
 	
-	# Задаём размеры поля сообщения
+	# Оформляем имя отправителя
+	var sender_name_formatted := "" 
+	if not message_sender.empty():
+		sender_name_formatted = NAME_TAGS_START + message_sender + NAME_TAGS_END + "\n"
+	
+	# Задаём минимальный размер поля сообщения
+	rect_min_size = update_rect_min_size(message_sender)
 	if message_text.empty():
 		rect_size = rect_min_size
 	else:
 		rect_size.x = longest_line_length + PANEL_ALIGN
 	
 	# Записываем текст и время в поле сообщения
-	$Panel/Text.bbcode_text = text_formatted + time_formatted
+	$Panel/Text.bbcode_text = sender_name_formatted + text_formatted + time_formatted
+
+
+# Задаём минимальный размер собщения
+func update_rect_min_size(sender_name: String) -> Vector2:
+	var result: Vector2
+	var sender_name_length: int = get_line_pixel_length(sender_name, message_sender_font)
+	
+	if is_edited:
+		result = PANEL_MIN_SIZE_EDITED
+	else:
+		result = PANEL_MIN_SIZE_EMPTY
+	
+	if result.x < sender_name_length:
+		result.x = sender_name_length
+	
+	result.x += PANEL_ALIGN
+	return result
 
 
 # Если сообщение добавлено в контейнер - изменяем его размер,
@@ -202,16 +237,14 @@ func set_message_time(value: String):
 
 func set_edited(value: bool):
 	is_edited = value
-	
-	# Задаём минимальный размер собщения
-	if is_edited:
-		rect_min_size = PANEL_MIN_SIZE_EDITED
-	else:
-		rect_min_size = PANEL_MIN_SIZE_EMPTY
-	
 	update_message()
 
 
 func set_reply(value: bool):
 	is_reply = value
+	update_message()
+
+
+func set_message_sender(value: String):
+	message_sender = value
 	update_message()

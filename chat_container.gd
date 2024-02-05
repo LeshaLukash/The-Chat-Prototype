@@ -5,7 +5,7 @@ tool
 # Это вертикальный список с прокруткой всех добавленых сообщений
 
 const GROUP_MESSAGES := "messages"
-const PARAMS_COUNT := 3
+const PARAMS_COUNT := 4
 
 export (String, FILE, "*.txt") var chat_text_file = "res://chats/chat_example.txt" setget set_chat
 
@@ -30,15 +30,6 @@ func load_chat(file_path: String = chat_text_file) -> void:
 	# Извлекаем данные из файла	
 	f.open(file_path, File.READ)
 	while f.get_position() < f.get_len():
-		# Считываем строку сообщения с учётом escape sequence's
-		var msg_line: String = f.get_line().c_unescape()
-		
-		# Если не хватает строки с параметрами - сбрасываем чат
-		if f.eof_reached():
-			clear_chat()
-			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
-			return
-		
 		# Считываем строку с параметрами сообщения
 		var params_line: String = f.get_line()
 		var msg_params: Array = get_params(params_line)
@@ -49,6 +40,15 @@ func load_chat(file_path: String = chat_text_file) -> void:
 			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
 			return
 		
+		# Если не хватает строки с текстом сообщения - сбрасываем чат
+		if f.eof_reached():
+			clear_chat()
+			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
+			return
+		# Считываем строку сообщения с учётом escape sequence's
+		var msg_line: String = f.get_line().c_unescape()
+
+
 		# Добавляем сообщение
 		var msg = m.instance()
 		msg.add_to_group(GROUP_MESSAGES)
@@ -71,11 +71,14 @@ func clear_chat() -> void:
 # Извлечь из строки параметры
 func get_params(string: String) -> Array:
 	var params := string.split(',')
-	var msg_time: String = params[0] # msg_time - время отправки
-	var is_edited := bool(int(params[1])) # is_edited - метка редактирования сообщения
-	var is_reply := bool(int(params[2]))  # is_reply - метка того, кто отправитель
+	print(params)
+	var msg_sender: String = params[0]	#msg_sender - имя отправителя
+	var msg_time: String = params[1] # msg_time - время отправки
+	var is_edited := bool(int(params[2])) # is_edited - метка редактирования сообщения
+	var is_reply := bool(int(params[3]))  # is_reply - метка того, кто отправитель
 	
 	var result := []
+	result.append(msg_sender)
 	result.append(msg_time)
 	result.append(is_edited)
 	result.append(is_reply)
