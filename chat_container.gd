@@ -53,9 +53,10 @@ func load_chat(file_path: String = chat_text_file) -> void:
 		var msg = m.instance()
 		msg.add_to_group(GROUP_MESSAGES)
 		msg.init_message(msg_line, msg_params)
-		$MessagesContainer.add_child(msg)
 		msg.update_message()
+		$MessagesContainer.add_child(msg)
 		msg.update_margins()
+
 
 
 # Удалить все сообщения из чата
@@ -75,13 +76,13 @@ func get_params(string: String) -> Array:
 	var msg_sender: String = params[0]	#msg_sender - имя отправителя
 	var msg_time: String = params[1] # msg_time - время отправки
 	var is_edited := bool(int(params[2])) # is_edited - метка редактирования сообщения
-	var is_reply := bool(int(params[3]))  # is_reply - метка того, кто отправитель
+	var is_player_reply := bool(int(params[3]))  # is_reply - метка того, кто отправитель
 	
 	var result := []
 	result.append(msg_sender)
 	result.append(msg_time)
 	result.append(is_edited)
-	result.append(is_reply)
+	result.append(is_player_reply)
 	return result
 	
 	

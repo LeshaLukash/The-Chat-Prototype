@@ -5,26 +5,31 @@ extends MarginContainer
 ## СООБЩЕНИЕ
 # Поле с текстом сообщения
 
+signal avatar_pressed	# Сигнал нажатия аватарки
+
 const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)	# Мин. размер пустого сообщения, без пометки
 const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения, с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
 const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
-const SCROLL_LINE_WIDTH := 12					# Ширина (в пикселях) линии прокрутки сообщений
+const SCROLL_LINE_WIDTH := 12					# Ширина линии прокрутки сообщений (в пикселях)
+const AVATAR_WIDTH := 40						# Ширина аватарки (в пикселях)
+const HBOX_ALIGN := 4							# Расстояние между элементами HBox (в пикселях)
 
 const TIME_TAGS_START := "[right][font=fonts/arial_time.tres]"
 const TIME_TAGS_END := "[/font][/right]"
 const NAME_TAGS_START := "[color=silver][font=fonts/arial_sender_name.tres]"
 const NAME_TAGS_END := "[/font][/color]"
 
-export (String) var message_sender = "Отправитель" setget set_message_sender					# Имя отправителя
 export (DynamicFont) var message_sender_font = preload("res://fonts/arial_sender_name.tres")	# Шрифт имени отправителя
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")						# Шрифт сообщения
 export (DynamicFont) var message_time_font = preload("res://fonts/arial_time.tres")				# Шрифт времени отправки
+export (String) var message_sender = "Отправитель" setget set_message_sender					# Имя отправителя
 export (String, MULTILINE) var message_text setget set_message_text								# Текст сообщения
 export (String) var message_time = "00:00" setget set_message_time								# Время отправки
-export (bool) var is_edited = false setget set_edited											# Пометка сообщения "изменено"
-export (bool) var is_reply = false setget set_reply												# Является ли сообщение ответом
+export (bool) var is_edited = false setget set_edited											# Флаг-пометка сообщения статусом "изменено"
+export (bool) var is_player_reply = false setget set_player_reply								# Флаг, является ли сообщение ответом "игрока"
+export (StreamTexture) var avatar_texture = preload("res://default_avatar.png")					# Текстура аватарки
 
 var longest_line_length := 0 # Длина самой длинной строки
 
@@ -34,8 +39,8 @@ func init_message(text: String, params: Array) -> void:
 	is_edited = params[2]
 	
 	# Если сообщение от главного героя - его имя не выводится
-	is_reply = params[3]
-	if is_reply:
+	is_player_reply = params[3]
+	if is_player_reply:
 		message_sender = ""
 	else:
 		message_sender = params[0]
@@ -64,15 +69,23 @@ func update_message() -> void:
 	if not message_sender.empty():
 		sender_name_formatted = NAME_TAGS_START + message_sender + NAME_TAGS_END + "\n"
 	
+	# Скрываем аватарку, если это сообщение от игрока
+	if is_player_reply:
+		get_node("%Avatar").hide()
+	else:
+		get_node("%Avatar").show()
+		
 	# Задаём минимальный размер поля сообщения
 	rect_min_size = update_rect_min_size(message_sender)
 	if message_text.empty():
 		rect_size = rect_min_size
 	else:
 		rect_size.x = longest_line_length + PANEL_ALIGN
-	
+		if not is_player_reply:
+			rect_size.x += AVATAR_WIDTH + HBOX_ALIGN
+
 	# Записываем текст и время в поле сообщения
-	$Panel/Text.bbcode_text = sender_name_formatted + text_formatted + time_formatted
+	get_node("%Text").bbcode_text = sender_name_formatted + text_formatted + time_formatted
 
 
 # Задаём минимальный размер собщения
@@ -87,6 +100,11 @@ func update_rect_min_size(sender_name: String) -> Vector2:
 	
 	if result.x < sender_name_length:
 		result.x = sender_name_length
+	
+	# Если это не ответ игрока - игрок видит аватарку отправителя
+	# Нужно учесть это при задании размера размеров сообщения
+	if not is_player_reply:
+		result.x += AVATAR_WIDTH + HBOX_ALIGN
 	
 	result.x += PANEL_ALIGN
 	return result
@@ -114,12 +132,15 @@ func update_margins():
 		# warning-ignore:narrowing_conversion
 		margin_border_max = game_screen_width - PANEL_MIN_SIZE_EMPTY.x - SCROLL_LINE_WIDTH
 	
-	if is_reply:
+	if is_player_reply:
 		add_constant_override("margin_right", 0)
 		# warning-ignore:narrowing_conversion
 		add_constant_override("margin_left", clamp(margin_border_current,
 				margin_border_min, margin_border_max))
 	else:
+		margin_border_min += AVATAR_WIDTH + HBOX_ALIGN
+		margin_border_max += AVATAR_WIDTH + HBOX_ALIGN
+		margin_border_current -= AVATAR_WIDTH + HBOX_ALIGN
 		# warning-ignore:narrowing_conversion
 		add_constant_override("margin_right", clamp(margin_border_current,
 				margin_border_min, margin_border_max))
@@ -240,11 +261,15 @@ func set_edited(value: bool):
 	update_message()
 
 
-func set_reply(value: bool):
-	is_reply = value
+func set_player_reply(value: bool):
+	is_player_reply = value
 	update_message()
 
 
 func set_message_sender(value: String):
 	message_sender = value
 	update_message()
+
+
+func _on_Avatar_pressed():
+	emit_signal("avatar_pressed")
