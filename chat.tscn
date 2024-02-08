@@ -7,6 +7,7 @@
 [node name="Chat" type="Control"]
 anchor_right = 1.0
 anchor_bottom = 1.0
+mouse_filter = 2
 
 [node name="Background" type="TextureRect" parent="."]
 anchor_right = 1.0
@@ -17,5 +18,12 @@ stretch_mode = 7
 
 [node name="ChatContainer" parent="." instance=ExtResource( 1 )]
 margin_top = 65.0
+scroll_vertical = 100
+
+[node name="MessagesContainer" parent="ChatContainer" index="0"]
+margin_top = -100.0
+margin_bottom = 1782.0
 
 [node name="ChatHeader" parent="." instance=ExtResource( 3 )]
+
+[editable path="ChatContainer"]

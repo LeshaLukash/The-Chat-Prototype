@@ -1,5 +1,5 @@
-extends ScrollContainer
 tool
+extends ScrollContainer
 
 # Окно чата
 # Это вертикальный список с прокруткой всех добавленых сообщений
@@ -14,6 +14,11 @@ onready var m := preload("res://message.tscn")
 
 func _ready():
 	load_chat(chat_text_file)
+
+
+func _input(event):
+	if event is InputEventScreenDrag:
+		scroll_vertical -= floor(event.relative.y)
 
 
 # Загрузить чат из текстового файла, расположенного по пути chat_text_file
@@ -58,7 +63,6 @@ func load_chat(file_path: String = chat_text_file) -> void:
 		msg.update_margins()
 
 
-
 # Удалить все сообщения из чата
 func clear_chat() -> void:
 	# Если группа пустая или отсутствует - завершаем функцию
@@ -72,7 +76,7 @@ func clear_chat() -> void:
 # Извлечь из строки параметры
 func get_params(string: String) -> Array:
 	var params := string.split(',')
-	print(params)
+
 	var msg_sender: String = params[0]	#msg_sender - имя отправителя
 	var msg_time: String = params[1] # msg_time - время отправки
 	var is_edited := bool(int(params[2])) # is_edited - метка редактирования сообщения
