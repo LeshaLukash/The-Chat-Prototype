@@ -18,7 +18,7 @@ func _ready():
 
 func _input(event):
 	if event is InputEventScreenDrag:
-		scroll_vertical -= floor(event.relative.y)
+		scroll_vertical -= floor(event.relative.y) 
 
 
 # Загрузить чат из текстового файла, расположенного по пути chat_text_file
