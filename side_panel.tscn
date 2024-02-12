@@ -1,0 +1,77 @@
+[gd_scene load_steps=3 format=2]
+
+[ext_resource path="res://side_panel.gd" type="Script" id=1]
+[ext_resource path="res://default_avatar.png" type="Texture" id=2]
+
+[node name="SidePanel" type="Control"]
+anchor_right = 0.266667
+anchor_bottom = 1.0
+margin_left = -160.0
+margin_right = -160.0
+rect_min_size = Vector2( 160, 800 )
+script = ExtResource( 1 )
+__meta__ = {
+"_edit_use_anchors_": true
+}
+
+[node name="ColorRect" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ColorRect"]
+anchor_right = 1.0
+anchor_bottom = 1.0
+
+[node name="MarginContainer3" type="MarginContainer" parent="ColorRect/VBoxContainer"]
+margin_right = 161.0
+margin_bottom = 113.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.22
+
+[node name="AccountButton" type="Button" parent="ColorRect/VBoxContainer/MarginContainer3"]
+margin_right = 161.0
+margin_bottom = 113.0
+text = "Никнейм"
+icon = ExtResource( 2 )
+flat = true
+expand_icon = true
+
+[node name="ChatButton" type="Button" parent="ColorRect/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 117.0
+margin_right = 161.0
+margin_bottom = 144.0
+text = "Название беседы"
+
+[node name="MarginContainer" type="MarginContainer" parent="ColorRect/VBoxContainer"]
+margin_top = 148.0
+margin_right = 161.0
+margin_bottom = 666.0
+size_flags_vertical = 3
+
+[node name="OptionsButton" type="Button" parent="ColorRect/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 670.0
+margin_right = 161.0
+margin_bottom = 697.0
+text = "Настройки"
+
+[node name="AboutButton" type="Button" parent="ColorRect/VBoxContainer"]
+unique_name_in_owner = true
+margin_top = 701.0
+margin_right = 161.0
+margin_bottom = 728.0
+size_flags_stretch_ratio = 2.0
+text = "О нас"
+
+[node name="MarginContainer2" type="MarginContainer" parent="ColorRect/VBoxContainer"]
+margin_top = 732.0
+margin_right = 161.0
+margin_bottom = 800.0
+size_flags_vertical = 3
+size_flags_stretch_ratio = 0.13
+
+[connection signal="item_rect_changed" from="." to="." method="_on_SidePanel_item_rect_changed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/ChatButton" to="." method="_on_ChatButton_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/OptionsButton" to="." method="_on_OptionsButton_pressed"]
+[connection signal="pressed" from="ColorRect/VBoxContainer/AboutButton" to="." method="_on_AboutButton_pressed"]

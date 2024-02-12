@@ -16,9 +16,9 @@ func _ready():
 	load_chat(chat_text_file)
 
 
-func _input(event):
-	if event is InputEventScreenDrag:
-		scroll_vertical -= floor(event.relative.y) 
+# Прокрутить список сообщений на pos-пикселей
+func scroll_messages(pos: float) -> void:
+	scroll_vertical -= floor(pos) 
 
 
 # Загрузить чат из текстового файла, расположенного по пути chat_text_file

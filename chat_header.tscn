@@ -12,6 +12,7 @@ script = ExtResource( 2 )
 [node name="ColorRect" type="ColorRect" parent="."]
 anchor_right = 1.0
 margin_bottom = 65.0
+mouse_filter = 2
 color = Color( 0.0736515, 0.0649, 0.59, 1 )
 
 [node name="Button" type="Button" parent="ColorRect"]
@@ -26,6 +27,7 @@ anchor_right = 0.5
 margin_left = -106.5
 margin_right = 106.5
 margin_bottom = 65.0
+mouse_filter = 2
 alignment = 1
 
 [node name="Avatar" type="TextureButton" parent="ColorRect/HBoxContainer"]
@@ -34,6 +36,7 @@ margin_top = 2.0
 margin_right = 60.0
 margin_bottom = 62.0
 rect_min_size = Vector2( 60, 60 )
+mouse_filter = 2
 size_flags_vertical = 6
 texture_normal = ExtResource( 1 )
 expand = true
