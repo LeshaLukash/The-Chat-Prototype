@@ -13,15 +13,20 @@ mouse_filter = 1
 script = ExtResource( 4 )
 
 [node name="Background" type="TextureRect" parent="."]
+visible = false
 anchor_right = 1.0
 anchor_bottom = 1.0
 texture = ExtResource( 2 )
 expand = true
 stretch_mode = 7
 
+[node name="ColorBackground" type="ColorRect" parent="."]
+anchor_right = 1.0
+anchor_bottom = 1.0
+color = Color( 0.196078, 0.447059, 0.407843, 1 )
+
 [node name="ChatContainer" parent="." instance=ExtResource( 1 )]
 margin_top = 65.0
-scroll_vertical = 100
 
 [node name="ChatHeader" parent="." instance=ExtResource( 3 )]
 
