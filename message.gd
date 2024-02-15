@@ -20,6 +20,8 @@ const TIME_TAGS_START := "[right][font=fonts/arial_time.tres]"
 const TIME_TAGS_END := "[/font][/right]"
 const NAME_TAGS_START := "[color=silver][font=fonts/arial_sender_name.tres]"
 const NAME_TAGS_END := "[/font][/color]"
+const EMPTY_AVATAR: StreamTexture = preload("res://empty_avatar.png")
+const DEFAULT_AVATAR: StreamTexture = preload("res://default_avatar.png")
 
 export (DynamicFont) var message_sender_font = preload("res://fonts/arial_sender_name.tres")	# Шрифт имени отправителя
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")						# Шрифт сообщения
@@ -29,7 +31,8 @@ export (String, MULTILINE) var message_text setget set_message_text								# Т�
 export (String) var message_time = "00:00" setget set_message_time								# Время отправки
 export (bool) var is_edited = false setget set_edited											# Флаг-пометка сообщения статусом "изменено"
 export (bool) var is_player_reply = false setget set_player_reply								# Флаг, является ли сообщение ответом "игрока"
-export (StreamTexture) var avatar_texture = preload("res://default_avatar.png")					# Текстура аватарки
+export (StreamTexture) var avatar_texture = DEFAULT_AVATAR setget set_avatar_texture # Текстура аватарки
+export (bool) var is_avatar_visible = true setget set_avatar_visible
 
 var longest_line_length := 0 # Длина самой длинной строки
 
@@ -39,7 +42,7 @@ func init_message(text: String, params: Array) -> void:
 	is_edited = params[2]
 	
 	# Если сообщение от главного героя - его имя не выводится
-	is_player_reply = params[3]
+	is_player_reply = params[3] 
 	if is_player_reply:
 		message_sender = ""
 	else:
@@ -71,9 +74,14 @@ func update_message() -> void:
 	
 	# Скрываем аватарку, если это сообщение от игрока
 	if is_player_reply:
-		get_node("%Avatar").hide()
-	else:
+		is_avatar_visible = false
+	
+	if is_avatar_visible:
 		get_node("%Avatar").show()
+	else:
+		get_node("%Avatar").hide()
+	
+	get_node("%Avatar").texture_normal = avatar_texture
 		
 	# Задаём минимальный размер поля сообщения
 	rect_min_size = update_rect_min_size(message_sender)
@@ -81,7 +89,7 @@ func update_message() -> void:
 		rect_size = rect_min_size
 	else:
 		rect_size.x = longest_line_length + PANEL_ALIGN
-		if not is_player_reply:
+		if not is_avatar_visible:
 			rect_size.x += AVATAR_WIDTH + HBOX_ALIGN
 
 	# Записываем текст и время в поле сообщения
@@ -103,7 +111,7 @@ func update_rect_min_size(sender_name: String) -> Vector2:
 	
 	# Если это не ответ игрока - игрок видит аватарку отправителя
 	# Нужно учесть это при задании размера размеров сообщения
-	if not is_player_reply:
+	if is_avatar_visible:
 		result.x += AVATAR_WIDTH + HBOX_ALIGN
 	
 	result.x += PANEL_ALIGN
@@ -112,7 +120,7 @@ func update_rect_min_size(sender_name: String) -> Vector2:
 
 # Если сообщение добавлено в контейнер - изменяем его размер,
 # управляя константами MarginContainer
-func update_margins():
+func update_margins() -> void:
 	var game_screen_width: float = get_viewport_rect().size.x
 	
 	var margin_border_min: int
@@ -138,9 +146,14 @@ func update_margins():
 		add_constant_override("margin_left", clamp(margin_border_current,
 				margin_border_min, margin_border_max))
 	else:
-		margin_border_min += AVATAR_WIDTH + HBOX_ALIGN
-		margin_border_max += AVATAR_WIDTH + HBOX_ALIGN
-		margin_border_current -= AVATAR_WIDTH + HBOX_ALIGN
+		margin_border_min += HBOX_ALIGN
+		margin_border_max += HBOX_ALIGN
+		margin_border_current -= HBOX_ALIGN
+		
+		if is_avatar_visible:
+			margin_border_min += AVATAR_WIDTH
+			margin_border_max += AVATAR_WIDTH
+			margin_border_current -= AVATAR_WIDTH
 		# warning-ignore:narrowing_conversion
 		add_constant_override("margin_right", clamp(margin_border_current,
 				margin_border_min, margin_border_max))
@@ -270,6 +283,13 @@ func set_message_sender(value: String):
 	message_sender = value
 	update_message()
 
+func set_avatar_visible(value: bool):
+	is_avatar_visible = value
+	update_message()
+
+func set_avatar_texture(value: StreamTexture):
+	avatar_texture = value
+	update_message()
 
 func _on_Avatar_pressed():
 	emit_signal("avatar_pressed")

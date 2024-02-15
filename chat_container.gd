@@ -32,8 +32,13 @@ func load_chat(file_path: String = chat_text_file) -> void:
 		printerr("Файл %s отсутствует!" %file_path)
 		return
 
-	# Извлекаем данные из файла	
+	# Извлекаем данные из файла
 	f.open(file_path, File.READ)
+	var current_sender: String	# Имя отправителя текущего сообщения
+	var previous_sender: String	# Имя отправителя предыдущего сообщения
+	var msg: Message
+	var previous_msg: Message
+	var previous_msg_edited := false
 	while f.get_position() < f.get_len():
 		# Считываем строку с параметрами сообщения
 		var params_line: String = f.get_line()
@@ -53,20 +58,30 @@ func load_chat(file_path: String = chat_text_file) -> void:
 		# Считываем строку сообщения с учётом escape sequence's
 		var msg_line: String = f.get_line().c_unescape()
 
-		
 		# Добавляем сообщение
-		var msg = m.instance()
-		var current_sender: String = msg_params[0] # Получаем имя отправителя
-		# Нужно получить имя текущего отправителя.
-		# Если сообщение первое - процедура сравнения отправителей игнорируется
-		# Иначе нужно сравнить текущего отправителя с предыдущим.
-		# Если совпадают - в сообщении отключаем имя и скрываем аватарку
+		msg = m.instance()
 		msg.add_to_group(GROUP_MESSAGES)
+		
+		# Проверка, является ли автор прошлого сообщения автором текущего сообщения
+		# Если так, то в последующих его сообщениях скрываем имя и аватарку
+		current_sender = msg_params[0]
+		if not previous_sender.empty(): # Код начнёт работу после первого сообщения
+			if previous_sender == current_sender:
+				previous_msg.avatar_texture = Message.EMPTY_AVATAR
+				msg_params[0] = ""
+				previous_msg_edited = true
+			elif previous_msg_edited:
+				previous_msg.message_sender = ""
+				previous_msg.update_message()
+				previous_msg.update_margins()
+				previous_msg_edited = false
+		previous_sender = current_sender
+		previous_msg = msg
+		
 		msg.init_message(msg_line, msg_params)
 		msg.update_message()
 		$MessagesContainer.add_child(msg)
 		msg.update_margins()
-		var previous_sender: String = current_sender
 
 
 # Удалить все сообщения из чата
