@@ -2,15 +2,15 @@
 
 importer="texture"
 type="StreamTexture"
-path="res://.import/default_avatar.png-c16edc08ee345fad6a383f8ba83a31aa.stex"
+path="res://.import/godot.png-acc5c58df9c5368bfd3b63c5a7fc2b5b.stex"
 metadata={
 "vram_texture": false
 }
 
 [deps]
 
-source_file="res://default_avatar.png"
-dest_files=[ "res://.import/default_avatar.png-c16edc08ee345fad6a383f8ba83a31aa.stex" ]
+source_file="res://avatars/godot.png"
+dest_files=[ "res://.import/godot.png-acc5c58df9c5368bfd3b63c5a7fc2b5b.stex" ]
 
 [params]
 

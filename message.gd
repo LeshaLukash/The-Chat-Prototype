@@ -20,8 +20,8 @@ const TIME_TAGS_START := "[right][font=fonts/arial_time.tres]"
 const TIME_TAGS_END := "[/font][/right]"
 const NAME_TAGS_START := "[color=silver][font=fonts/arial_sender_name.tres]"
 const NAME_TAGS_END := "[/font][/color]"
-const EMPTY_AVATAR: StreamTexture = preload("res://empty_avatar.png")
-const DEFAULT_AVATAR: StreamTexture = preload("res://default_avatar.png")
+const EMPTY_AVATAR: StreamTexture = preload("res://avatars/empty_avatar.png")
+const DEFAULT_AVATAR: StreamTexture = preload("res://avatars/default_avatar.png")
 
 export (DynamicFont) var message_sender_font = preload("res://fonts/arial_sender_name.tres")	# Шрифт имени отправителя
 export (DynamicFont) var message_font = preload("res://fonts/arial.tres")						# Шрифт сообщения
@@ -95,6 +95,10 @@ func update_message() -> void:
 	# Записываем текст и время в поле сообщения
 	get_node("%Text").bbcode_text = sender_name_formatted + text_formatted + time_formatted
 
+
+func update_avatar(texture: StreamTexture) -> void:
+	avatar_texture = texture
+	
 
 # Задаём минимальный размер собщения
 func update_rect_min_size(sender_name: String) -> Vector2:

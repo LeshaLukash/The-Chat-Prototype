@@ -24,6 +24,10 @@ config/name="The Chat Prototype"
 run/main_scene="res://chat.tscn"
 config/icon="res://icon.png"
 
+[autoload]
+
+AvatarsDB="*res://avatars/avatars_db.gd"
+
 [display]
 
 window/size/width=600
