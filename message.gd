@@ -38,6 +38,8 @@ var longest_line_length := 0 # Длина самой длинной строки
 
 
 func init_message(text: String, params: Array) -> void:
+	message_sender = params[0]
+	avatar_texture = AvatarsDB.get_avatar(message_sender)
 	message_time = params[1]
 	is_edited = params[2]
 	
@@ -45,9 +47,8 @@ func init_message(text: String, params: Array) -> void:
 	is_player_reply = params[3] 
 	if is_player_reply:
 		message_sender = ""
-	else:
-		message_sender = params[0]
-
+	
+	
 	message_text = text
 
 

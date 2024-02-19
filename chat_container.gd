@@ -18,6 +18,7 @@ func _ready():
 
 # Прокрутить список сообщений на pos-пикселей
 func scroll_messages(pos: float) -> void:
+	# warning-ignore:narrowing_conversion
 	scroll_vertical -= floor(pos) 
 
 
@@ -74,6 +75,7 @@ func load_chat(file_path: String = chat_text_file) -> void:
 				previous_msg.message_sender = ""
 				previous_msg.update_message()
 				previous_msg.update_margins()
+				previous_msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
 				previous_msg_edited = false
 		previous_sender = current_sender
 		previous_msg = msg
