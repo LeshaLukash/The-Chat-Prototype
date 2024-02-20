@@ -9,7 +9,8 @@ const PARAMS_COUNT := 4
 
 export (String, FILE, "*.txt") var chat_text_file = "res://chats/chat_example.txt" setget set_chat
 
-onready var m := preload("res://message.tscn")
+onready var message_scene := preload("res://message.tscn")
+onready var info_label_scene := preload("res://info_label.tscn")
 
 
 func _ready():
@@ -40,50 +41,58 @@ func load_chat(file_path: String = chat_text_file) -> void:
 	var msg: Message
 	var previous_msg: Message
 	var previous_msg_edited := false
+	
 	while f.get_position() < f.get_len():
-		# Считываем строку с параметрами сообщения
-		var params_line: String = f.get_line()
-		var msg_params: Array = get_params(params_line)
-		
-		# Если строка с параметрами имеет не три параметра - сбрасыываем чат
-		if msg_params.size() != PARAMS_COUNT:
-			clear_chat()
-			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
-			return
-		
-		# Если не хватает строки с текстом сообщения - сбрасываем чат
-		if f.eof_reached():
-			clear_chat()
-			printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
-			return
-		# Считываем строку сообщения с учётом escape sequence's
-		var msg_line: String = f.get_line().c_unescape()
+		var line = f.get_line()
+		if line.begins_with('<') and line.ends_with('>'):
+			var info_label = info_label_scene.instance()
+			var info_label_text: String = line.trim_prefix('<')
+			info_label_text = info_label_text.trim_suffix('>')
+			info_label.set_text(info_label_text)
+			$MessagesContainer.add_child(info_label)
+		else:
+			# Считываем строку с параметрами сообщения
+			var msg_params: Array = get_params(line)
+			
+			# Если строка с параметрами имеет не три параметра - сбрасыываем чат
+			if msg_params.size() != PARAMS_COUNT:
+				clear_chat()
+				printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
+				return
+			
+			# Если не хватает строки с текстом сообщения - сбрасываем чат
+			if f.eof_reached():
+				clear_chat()
+				printerr("Ошибка при чтении файла %s - вероятно, он не полон!" %file_path)
+				return
+			# Считываем строку сообщения с учётом escape sequence's
+			var msg_line: String = f.get_line().c_unescape()
 
-		# Добавляем сообщение
-		msg = m.instance()
-		msg.add_to_group(GROUP_MESSAGES)
-		
-		# Проверка, является ли автор прошлого сообщения автором текущего сообщения
-		# Если так, то в последующих его сообщениях скрываем имя и аватарку
-		current_sender = msg_params[0]
-		if not previous_sender.empty(): # Код начнёт работу после первого сообщения
-			if previous_sender == current_sender:
-				previous_msg.avatar_texture = Message.EMPTY_AVATAR
-				msg_params[0] = ""
-				previous_msg_edited = true
-			elif previous_msg_edited:
-				previous_msg.message_sender = ""
-				previous_msg.update_message()
-				previous_msg.update_margins()
-				previous_msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
-				previous_msg_edited = false
-		previous_sender = current_sender
-		previous_msg = msg
-		
-		msg.init_message(msg_line, msg_params)
-		msg.update_message()
-		$MessagesContainer.add_child(msg)
-		msg.update_margins()
+			# Добавляем сообщение
+			msg = message_scene.instance()
+			msg.add_to_group(GROUP_MESSAGES)
+			
+			# Проверка, является ли автор прошлого сообщения автором текущего сообщения
+			# Если так, то в последующих его сообщениях скрываем имя и аватарку
+			current_sender = msg_params[0]
+			if not previous_sender.empty(): # Код начнёт работу после первого сообщения
+				if previous_sender == current_sender:
+					previous_msg.avatar_texture = Message.EMPTY_AVATAR
+					msg_params[0] = ""
+					previous_msg_edited = true
+				elif previous_msg_edited:
+					previous_msg.message_sender = ""
+					previous_msg.update_message()
+					previous_msg.update_margins()
+					previous_msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
+					previous_msg_edited = false
+			previous_sender = current_sender
+			previous_msg = msg
+			
+			msg.init_message(msg_line, msg_params)
+			msg.update_message()
+			$MessagesContainer.add_child(msg)
+			msg.update_margins()
 
 
 # Удалить все сообщения из чата
