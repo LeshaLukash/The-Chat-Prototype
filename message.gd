@@ -1,9 +1,9 @@
 tool
 class_name Message
 extends MarginContainer
-
 ## СООБЩЕНИЕ
 # Поле с текстом сообщения
+
 
 signal avatar_pressed	# Сигнал нажатия аватарки
 
@@ -15,7 +15,6 @@ const PANEL_ALIGN := 14							# Отступы $Panel по краям от те�
 const SCROLL_LINE_WIDTH := 12					# Ширина линии прокрутки сообщений (в пикселях)
 const AVATAR_WIDTH := 40						# Ширина аватарки (в пикселях)
 const HBOX_ALIGN := 4							# Расстояние между элементами HBox (в пикселях)
-
 const TIME_TAGS_START := "[right][font=fonts/arial_time.tres]"
 const TIME_TAGS_END := "[/font][/right]"
 const NAME_TAGS_START := "[color=silver][font=fonts/arial_sender_name.tres]"
@@ -37,6 +36,7 @@ export (bool) var is_avatar_visible = true setget set_avatar_visible
 var longest_line_length := 0 # Длина самой длинной строки
 
 
+# Загрузка данных в сообщение
 func init_message(text: String, params: Array) -> void:
 	message_sender = params[0]
 	avatar_texture = AvatarsDB.get_avatar(message_sender)
@@ -47,26 +47,22 @@ func init_message(text: String, params: Array) -> void:
 	is_player_reply = params[3] 
 	if is_player_reply:
 		message_sender = ""
-	
-	
+
 	message_text = text
 
 
 # Обновить текст/время сообщения, его размеры
 func update_message() -> void:
-	
 	# Рассчитываем параметры текста
 	var text_formatted: String = format_message(message_text)
 	var longest_line: String = get_longest_text_line(text_formatted)
 	
 	longest_line_length = get_line_pixel_length(longest_line)
 	
-	# Рассчитываем параметры приписки о времени
-	var time_formatted: String
+	var time_formatted: String = TIME_TAGS_START + message_time
 	if is_edited:
-		time_formatted = TIME_TAGS_START + message_time + ", изменено" + TIME_TAGS_END
-	else:
-		time_formatted = TIME_TAGS_START + message_time + TIME_TAGS_END
+		time_formatted += ", изменено"
+	time_formatted += TIME_TAGS_END
 	
 	# Оформляем имя отправителя
 	var sender_name_formatted := "" 
@@ -123,33 +119,26 @@ func update_rect_min_size(sender_name: String) -> Vector2:
 	return result
 
 
-# Если сообщение добавлено в контейнер - изменяем его размер,
-# управляя константами MarginContainer
+# Если сообщение добавлено в контейнер - изменяем его размер, управляя константами MarginContainer
 func update_margins() -> void:
 	var game_screen_width: float = get_viewport_rect().size.x
 	
 	var margin_border_min: int
 	var margin_border_max: int
-	# warning-ignore:narrowing_conversion
-	var margin_border_current: int = game_screen_width - longest_line_length -\
-			PANEL_ALIGN - SCROLL_LINE_WIDTH
+	var margin_border_current: int = int(round(game_screen_width - longest_line_length -\
+			PANEL_ALIGN - SCROLL_LINE_WIDTH))
 		
 	if is_edited:
-		# warning-ignore:narrowing_conversion
-		margin_border_min = PANEL_MIN_SIZE_EDITED.x + SCROLL_LINE_WIDTH
-		# warning-ignore:narrowing_conversion
-		margin_border_max = game_screen_width - PANEL_MIN_SIZE_EDITED.x - SCROLL_LINE_WIDTH
+		margin_border_min = int(round(PANEL_MIN_SIZE_EDITED.x + SCROLL_LINE_WIDTH))
+		margin_border_max = int(round(game_screen_width - PANEL_MIN_SIZE_EDITED.x - SCROLL_LINE_WIDTH))
 	else:
-		# warning-ignore:narrowing_conversion
-		margin_border_min = PANEL_MIN_SIZE_EMPTY.x
-		# warning-ignore:narrowing_conversion
-		margin_border_max = game_screen_width - PANEL_MIN_SIZE_EMPTY.x - SCROLL_LINE_WIDTH
+		margin_border_min = int(round(PANEL_MIN_SIZE_EMPTY.x))
+		margin_border_max = int(round(game_screen_width - PANEL_MIN_SIZE_EMPTY.x - SCROLL_LINE_WIDTH))
 	
 	if is_player_reply:
 		add_constant_override("margin_right", 0)
-		# warning-ignore:narrowing_conversion
-		add_constant_override("margin_left", clamp(margin_border_current,
-				margin_border_min, margin_border_max))
+		add_constant_override("margin_left", int(clamp(margin_border_current,
+				margin_border_min, margin_border_max)))
 	else:
 		margin_border_min += HBOX_ALIGN
 		margin_border_max += HBOX_ALIGN
@@ -159,9 +148,9 @@ func update_margins() -> void:
 			margin_border_min += AVATAR_WIDTH
 			margin_border_max += AVATAR_WIDTH
 			margin_border_current -= AVATAR_WIDTH
-		# warning-ignore:narrowing_conversion
-		add_constant_override("margin_right", clamp(margin_border_current,
-				margin_border_min, margin_border_max))
+		
+		add_constant_override("margin_right", int(clamp(margin_border_current,
+				margin_border_min, margin_border_max)))
 		remove_constant_override("margin_left")
 
 
@@ -266,35 +255,45 @@ func get_longest_text_line(text: String) -> String:
 ## СЕТТЕРЫ/ГЕТТЕРЫ
 func set_message_text(value: String):
 	message_text = value
-	update_message()
+	if Engine.is_editor_hint():
+		update_message()
 
 
 func set_message_time(value: String):
 	message_time = value
-	update_message()
+	if Engine.is_editor_hint():
+		update_message()
 
 
 func set_edited(value: bool):
 	is_edited = value
-	update_message()
+	if Engine.is_editor_hint():
+		update_message()
 
 
 func set_player_reply(value: bool):
 	is_player_reply = value
-	update_message()
+	if Engine.is_editor_hint():
+		update_message()
 
 
 func set_message_sender(value: String):
 	message_sender = value
-	update_message()
+	if Engine.is_editor_hint():
+		update_message()
+
 
 func set_avatar_visible(value: bool):
 	is_avatar_visible = value
 	update_message()
 
+
 func set_avatar_texture(value: StreamTexture):
 	avatar_texture = value
-	update_message()
+	get_node("%Avatar").texture_normal = avatar_texture
+	if Engine.is_editor_hint():
+		update_message()
+
 
 func _on_Avatar_pressed():
 	emit_signal("avatar_pressed")
