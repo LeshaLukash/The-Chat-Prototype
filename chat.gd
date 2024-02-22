@@ -5,23 +5,27 @@ extends Control
 const FADE_MAX := 150 				# Макс. затенение экрана сообщений
 const DRAG_LENGTH := 10				# Макс. длина свайпа, после чего проверяется его назначение
 const INERTIA_SCROLL_SPEED := 0.5	# Скорость прокрутки сообщений после того, как игрок отпустил палец
-const INERTIA_HIDDEN_SCROLL_SPEED := 1
+const INERTIA_HIDDEN_SCROLL_SPEED := 3
 
 var drag_vector := Vector2.ZERO		# Вектор перемещения пальцем по экрану
 var is_drag_started := false		# Флаг, начал ли игрок протягивать пальцем по экрану
 var scroll_speed := 0.0				# Скорость прокрутки сообщений
+var can_inert_scroll: bool
 
 
 func _process(_delta):
 	var scroll_slowing_speed: float
 	
-	if is_drag_started:
-		scroll_slowing_speed = INERTIA_HIDDEN_SCROLL_SPEED
-	else:
-		scroll_slowing_speed = INERTIA_SCROLL_SPEED
-	
 	if scroll_speed != 0:
+		if is_drag_started:
+			scroll_slowing_speed = INERTIA_HIDDEN_SCROLL_SPEED
+		else:
+			scroll_slowing_speed = INERTIA_SCROLL_SPEED
+		
 		scroll_speed -= scroll_slowing_speed * sign(scroll_speed)
+		
+	
+	if can_inert_scroll:
 		$ChatContainer.scroll_messages(scroll_speed)
 
 
@@ -38,7 +42,9 @@ func _input(event):
 	if event is InputEventScreenTouch:
 		if event.pressed:
 			scroll_speed = 0
+			can_inert_scroll = false
 		else:
+			can_inert_scroll = true
 			is_drag_started = false
 			drag_vector = Vector2.ZERO
 			

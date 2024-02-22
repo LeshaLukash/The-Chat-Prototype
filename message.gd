@@ -7,8 +7,8 @@ extends MarginContainer
 
 signal avatar_pressed	# Сигнал нажатия аватарки
 
-const PANEL_MIN_SIZE_EMPTY := Vector2(54, 58)	# Мин. размер пустого сообщения, без пометки
-const PANEL_MIN_SIZE_EDITED := Vector2(122, 58)	# Мин. размер пустого сообщения, с пометкой
+const PANEL_MIN_SIZE_EMPTY := Vector2(108, 72)	# Мин. размер пустого сообщения, без пометки
+const PANEL_MIN_SIZE_EDITED := Vector2(209, 72)	# Мин. размер пустого сообщения, с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
 const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
@@ -82,6 +82,7 @@ func update_message() -> void:
 		
 	# Задаём минимальный размер поля сообщения
 	rect_min_size = update_rect_min_size(message_sender)
+	
 	if message_text.empty():
 		rect_size = rect_min_size
 	else:
@@ -100,22 +101,16 @@ func update_avatar(texture: StreamTexture) -> void:
 # Задаём минимальный размер собщения
 func update_rect_min_size(sender_name: String) -> Vector2:
 	var result: Vector2
-	var sender_name_length: int = get_line_pixel_length(sender_name, message_sender_font)
 	
 	if is_edited:
 		result = PANEL_MIN_SIZE_EDITED
 	else:
 		result = PANEL_MIN_SIZE_EMPTY
 	
+	var sender_name_length: int = get_line_pixel_length(sender_name, message_sender_font)
 	if result.x < sender_name_length:
 		result.x = sender_name_length
-	
-	# Если это не ответ игрока - игрок видит аватарку отправителя
-	# Нужно учесть это при задании размера размеров сообщения
-	if is_avatar_visible:
-		result.x += AVATAR_WIDTH + HBOX_ALIGN
-	
-	result.x += PANEL_ALIGN
+
 	return result
 
 
@@ -291,6 +286,7 @@ func set_avatar_visible(value: bool):
 func set_avatar_texture(value: StreamTexture):
 	avatar_texture = value
 	get_node("%Avatar").texture_normal = avatar_texture
+	
 	if Engine.is_editor_hint():
 		update_message()
 

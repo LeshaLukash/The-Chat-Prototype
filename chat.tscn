@@ -27,7 +27,7 @@ color = Color( 0.196078, 0.447059, 0.407843, 1 )
 
 [node name="ChatContainer" parent="." instance=ExtResource( 1 )]
 margin_top = 65.0
-scroll_vertical = 2598
+scroll_vertical = 0
 
 [node name="ChatHeader" parent="." instance=ExtResource( 3 )]
 
@@ -38,5 +38,8 @@ mouse_filter = 2
 color = Color( 0, 0, 0, 0 )
 
 [node name="SidePanel" parent="." instance=ExtResource( 5 )]
+anchor_right = 0.0
+margin_left = -360.0
+rect_min_size = Vector2( 360, 1280 )
 
 [connection signal="side_panel_dragged" from="SidePanel" to="." method="_on_SidePanel_side_panel_dragged"]
