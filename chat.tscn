@@ -27,7 +27,7 @@ color = Color( 0.196078, 0.447059, 0.407843, 1 )
 
 [node name="ChatContainer" parent="." instance=ExtResource( 1 )]
 margin_top = 65.0
-scroll_vertical = 0
+scroll_vertical = 2598
 
 [node name="ChatHeader" parent="." instance=ExtResource( 3 )]
 

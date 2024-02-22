@@ -18,8 +18,7 @@ func _ready():
 
 # Прокрутить список сообщений на pos-пикселей
 func scroll_messages(pos: float) -> void:
-	# warning-ignore:narrowing_conversion
-	scroll_vertical -= floor(pos) 
+	scroll_vertical -= int(floor(pos)) 
 
 
 # Загрузить чат из текстового файла, расположенного по пути chat_text_file
@@ -82,7 +81,6 @@ func add_message(text: String, params: Array, is_last_msg := false) -> void:
 	elif previous_msg_edited:
 		previous_msg.message_sender = ""
 		previous_msg.update_message()
-		previous_msg.update_margins()
 		previous_msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
 		previous_msg_edited = false
 	previous_sender = current_sender
@@ -98,6 +96,7 @@ func add_message(text: String, params: Array, is_last_msg := false) -> void:
 	
 	$MessagesContainer.add_child(msg)
 	msg.update_margins()
+	
 
 
 # Удалить все сообщения из чата
