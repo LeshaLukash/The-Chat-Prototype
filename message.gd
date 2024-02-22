@@ -7,11 +7,11 @@ extends MarginContainer
 
 signal avatar_pressed	# Сигнал нажатия аватарки
 
-const PANEL_MIN_SIZE_EMPTY := Vector2(108, 72)	# Мин. размер пустого сообщения, без пометки
-const PANEL_MIN_SIZE_EDITED := Vector2(209, 72)	# Мин. размер пустого сообщения, с пометкой
+const PANEL_MIN_SIZE_EMPTY := Vector2(108, 105)	# Мин. размер пустого сообщения, без пометки
+const PANEL_MIN_SIZE_EDITED := Vector2(209, 105)# Мин. размер пустого сообщения, с пометкой
 const LINE_MAX_LENGTH := 400					# Макс. длина строки сообщения (в пикселях!)
 const WORD_MAX_LENGTH := 35 					# Макс. длина слова в русском языке (в символах!)
-const PANEL_ALIGN := 14							# Отступы $Panel по краям от текста (наверное) 
+const PANEL_ALIGN := 18							# Отступы $Panel по краям от текста (наверное) 
 const SCROLL_LINE_WIDTH := 12					# Ширина линии прокрутки сообщений (в пикселях)
 const AVATAR_WIDTH := 40						# Ширина аватарки (в пикселях)
 const HBOX_ALIGN := 4							# Расстояние между элементами HBox (в пикселях)
@@ -81,7 +81,7 @@ func update_message() -> void:
 	get_node("%Avatar").texture_normal = avatar_texture
 		
 	# Задаём минимальный размер поля сообщения
-	rect_min_size = update_rect_min_size(message_sender)
+	#rect_min_size = update_rect_min_size(message_sender)
 	
 	if message_text.empty():
 		rect_size = rect_min_size
@@ -110,6 +110,8 @@ func update_rect_min_size(sender_name: String) -> Vector2:
 	var sender_name_length: int = get_line_pixel_length(sender_name, message_sender_font)
 	if result.x < sender_name_length:
 		result.x = sender_name_length
+	
+	result.x += AVATAR_WIDTH + PANEL_ALIGN
 
 	return result
 
