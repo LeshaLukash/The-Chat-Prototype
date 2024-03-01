@@ -75,7 +75,7 @@ func add_message(text: String, params: Array, is_last_msg := false) -> void:
 	# Если так, то в последующих его сообщениях скрываем имя и аватарку
 	current_sender = params[0]
 	if previous_sender == current_sender:
-		previous_msg.avatar_texture = Message.EMPTY_AVATAR
+		previous_msg.avatar_texture = AvatarsDB.get_avatar("empty")
 		params[0] = ""
 		previous_msg_edited = true
 	elif previous_msg_edited:
