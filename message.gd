@@ -6,8 +6,7 @@ extends MarginContainer
 
 signal avatar_pressed # Сигнал нажатия аватарки
 
-const LINE_MAX_LENGTH := 400 	# Макс. длина строки сообщения (в пикселях!)
-const SENDER_MAX_LENGTH := 40	# Макс. длина имени (в символах!)
+const LINE_MAX_LENGTH := 400	# Макс. длина строки сообщения (в пикселях!)
 const LOST_LETTER_SIZE := 14	# Длина, которую нужно прибавлять к ширине панели
 
 # Константы тегов, форматирующих имя отправителя и время в тексте сообщения
@@ -32,25 +31,26 @@ var avatar_texture # Текстура аватарки
 
 # Обновить содержимое сообщения
 func update_message() -> void:
-	# Подгатавливаем строку с именем отправителя
+	# Форматируем содержимое сообщений
 	var sender_formatted: String = SENDER_TAGS_START + sender + SENDER_TAGS_END
-	# Подгатавливаем строку со временем
+	var text_formatted: String = $TextFormatter.format_text(text, LINE_MAX_LENGTH, text_font)
 	var time_formatted: String = TIME_TAGS_START + get_time_status() + TIME_TAGS_END
 	
 	# Обновляем содержимое сообщения
-	get_node("%Text").bbcode_text = sender_formatted + "\n" + text + "\n" + time_formatted
-	get_node("%Panel").rect_min_size.x = set_panel_width()
+	get_node("%Text").bbcode_text = sender_formatted + "\n" + text_formatted + "\n" + time_formatted
+	get_node("%Panel").rect_min_size.x = calc_panel_width() + LOST_LETTER_SIZE
 
 
-# Обновить ширину панели, в зависимости от размера содержимого
-func set_panel_width() -> int:
+# Вычислить ширину панели, в зависимости от размера содержимого
+func calc_panel_width() -> int:
 	var sender_length: int = $TextFormatter.get_line_pixel_length(sender, sender_font)
 	var text_longest_line: String = $TextFormatter.get_longest_text_line(text, text_font)
 	var text_length: int = $TextFormatter.get_line_pixel_length(text_longest_line, text_font)
 	var time_length: int = $TextFormatter.get_line_pixel_length(get_time_status(), time_font)
 	
-	var length_to_compare: Array = [sender_length, time_length, text_length]
-	var panel_width: int = length_to_compare.max() + LOST_LETTER_SIZE
+	var length_to_compare: Array = [sender_length, text_length, time_length]
+	var panel_width: int = int(clamp(length_to_compare.max(),
+			0, LINE_MAX_LENGTH))
 	return panel_width
 
 
@@ -62,10 +62,7 @@ func get_time_status() -> String:
 
 
 func set_sender(value: String):
-	if value.empty(): # Если значения нет - ставим пробел
-		sender = " "
-	else:
-		sender = value.substr(0, SENDER_MAX_LENGTH - 1) # Задаём имя, не превышающее по длине лимит
+	sender = value.substr(0, $TextFormatter.SENDER_MAX_LENGTH - 1) # Задаём имя, не превышающее по длине лимит
 	update_message()
 
 
