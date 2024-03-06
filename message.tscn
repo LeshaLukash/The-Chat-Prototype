@@ -10,8 +10,7 @@ margin_right = 110.0
 margin_bottom = 72.0
 rect_pivot_offset = Vector2( -513, -236 )
 script = ExtResource( 2 )
-sender = "a"
-text = "a"
+sender = " "
 time = "16:44"
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
@@ -33,7 +32,7 @@ unique_name_in_owner = true
 margin_left = 44.0
 margin_right = 110.0
 margin_bottom = 105.0
-rect_min_size = Vector2( 0.128, 0 )
+rect_min_size = Vector2( 64, 0 )
 size_flags_horizontal = 3
 theme = ExtResource( 1 )
 
@@ -46,11 +45,11 @@ margin_bottom = 98.0
 rect_min_size = Vector2( 52, 91 )
 rect_clip_content = false
 bbcode_enabled = true
-bbcode_text = "[color=silver][font=fonts/arial_sender_name.tres]a[/font][/color]
-a
+bbcode_text = "[color=silver][font=fonts/arial_sender_name.tres] [/font][/color]
+
 [right][font=fonts/arial_time.tres]16:44[/font][/right]"
-text = "a
-a
+text = " 
+
 16:44"
 fit_content_height = true
 scroll_active = false
