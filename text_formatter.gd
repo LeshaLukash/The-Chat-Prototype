@@ -2,7 +2,7 @@ tool
 extends Node
 # Служебный скрипт для комплексной обработки текста
 
-const WORD_MAX_LENGTH := 35	# Макс. длина слова в русском языке (в символах!)
+const WORD_MAX_LENGTH := 35		# Макс. длина слова в русском языке (в символах!)
 const SENDER_MAX_LENGTH := 40	# Макс. длина имени (в символах!)
 
 # Разбить большую строку на строки поменьше (без переносов!)
@@ -62,10 +62,12 @@ func format_text(text: String, line_max_length: int, text_font: DynamicFont) -> 
 		# Если строка слишком длинная
 		else:
 			var line_split: Array = format_line(line, line_max_length, text_font)
-			printt("Получена строка: ", line_split)
 			for string in line_split:
 				result += string + '\n'
-	return result.trim_suffix('\n') # Последняя строка идёт с лишним переносом в конце - удаляем его
+	
+	# Последняя строка идёт с лишним переносом в конце - удаляем его
+	result = result.trim_suffix('\n')
+	return result
 
 
 # Получить длину строки, в пикселях
