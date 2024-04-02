@@ -5,43 +5,41 @@ extends Node
 const WORD_MAX_LENGTH := 35		# Макс. длина слова в русском языке (в символах!)
 const SENDER_MAX_LENGTH := 40	# Макс. длина имени (в символах!)
 
+
 # Разбить большую строку на строки поменьше (без переносов!)
 func format_line(line: String, line_max_length: int, line_font: DynamicFont) -> Array:
 	var result := []
 	var line_words: PoolStringArray = line.split(' ')
-	var last_word_idx: int = line_words.size() - 1 # Индекс последнего слова
+	var str_tmp := "" # Хранит промежуточные этапы разбиения
 	
-	var string := "" # Хранит промежуточные этапы разбиения
-	for i in line_words.size():
-		var word: String = line_words[i]
+	for word in line_words:
 		
 		# Если текущее слово сликом длинное (вероятно, спам букв)
 		if word.length() >= WORD_MAX_LENGTH:
-			for j in word.length():
-				var letter: String = word[j]
-				
-				if get_line_pixel_length(string + letter, line_font) <= line_max_length:
-					string += letter
+			for ch in word:
+				if get_line_pixel_length(str_tmp + ch, line_font) <= line_max_length:
+					str_tmp += ch
 				else:
-					result.append(string)
-					string = letter
+					result.append(str_tmp)
+					str_tmp = ch
 		# Пытаемся вместить слово с пробелом после него
-		elif get_line_pixel_length(string + word + ' ', line_font) <= line_max_length:
-			string += word + ' '
+		elif get_line_pixel_length(str_tmp + word + ' ', line_font) <= line_max_length:
+			str_tmp += word + ' '
 		# Пытаемся вместить слово без пробела после него
 		# Слово последним будет в этой строке, поэтому после отдаём её
-		elif get_line_pixel_length(string + word, line_font) <= line_max_length:
-			string += word
-			result.append(string)
-			string = ""
+		elif get_line_pixel_length(str_tmp + word, line_font) <= line_max_length:
+			str_tmp += word
+			result.append(str_tmp)
+			str_tmp = ""
 		# Если даже и слово не влазит - оставляем его для новой строки
 		else:
-			result.append(string.trim_suffix(' '))
-			string = word + ' '
+			result.append(str_tmp.trim_suffix(' '))
+			str_tmp = word + ' '
 		
 		# Не забываем забрать незаконченые строки
-		if i == last_word_idx:
-			result.append(string.trim_suffix(' '))
+		if word == line_words[-1]:
+			result.append(str_tmp.trim_suffix(' '))
+	print("format_line: " + str(result))
 	return result
 
 
@@ -52,21 +50,20 @@ func format_text(text: String, line_max_length: int, text_font: DynamicFont) -> 
 	
 	var result := ""
 	var text_lines: PoolStringArray = text.split('\n')
-	
-	for i in text_lines.size():
-		var line: String = text_lines[i]
-		
+
+	for line in text_lines:
 		# Если текущая строка не слишком длинная
 		if get_line_pixel_length(line, text_font) <= line_max_length:
-			result += line + '\n'
+			result += line
 		# Если строка слишком длинная
 		else:
-			var line_split: Array = format_line(line, line_max_length, text_font)
-			for string in line_split:
-				result += string + '\n'
-	
-	# Последняя строка идёт с лишним переносом в конце - удаляем его
-	result = result.trim_suffix('\n')
+			var line_formatted: Array = format_line(line, line_max_length, text_font)
+			for string in line_formatted:
+				result += string
+				if string != line_formatted[-1]:
+					result += '\n'
+
+	print("format_text: " + result.c_escape())
 	return result
 
 

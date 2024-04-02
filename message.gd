@@ -44,13 +44,13 @@ func update_message() -> void:
 	
 	# Обновляем содержимое сообщения и подгоняем его под размеры
 	get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' + time_formatted
-	get_node("%Text").rect_min_size.x = calc_message_width()
+	get_node("%Text").rect_min_size.x = calc_message_width(text_formatted)
 	
 
 # Вычислить ширину сообщения, в зависимости от размера содержимого
-func calc_message_width() -> int:
+func calc_message_width(text_formatted: String) -> int:
 	var sender_length: int = $TextFormatter.get_line_pixel_length(sender, sender_font)
-	var text_longest_line: String = $TextFormatter.get_longest_text_line(text, text_font)
+	var text_longest_line: String = $TextFormatter.get_longest_text_line(text_formatted, text_font)
 	var text_length: int = $TextFormatter.get_line_pixel_length(text_longest_line, text_font)
 	var time_length: int = $TextFormatter.get_line_pixel_length(get_time_status(), time_font)
 	
