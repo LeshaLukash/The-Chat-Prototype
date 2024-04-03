@@ -34,7 +34,6 @@ export (bool) var is_player_reply = false
 # Текстура аватарки
 var avatar_texture
 
-
 # Обновить содержимое сообщения
 func update_message() -> void:
 	# Форматируем содержимое сообщения
@@ -69,19 +68,22 @@ func get_time_status() -> String:
 
 #################### СЕТТЕРЫ ####################
 func set_sender(value: String):
-	# Задаём имя, не превышающее по длине лимит
-	sender = value.substr(0, $TextFormatter.SENDER_MAX_LENGTH - 1)
-	update_message()
+	if get_node_or_null("TextFormatter") != null:
+		# Задаём имя, не превышающее по длине лимит
+		sender = value.substr(0, $TextFormatter.SENDER_MAX_LENGTH - 1)
+		update_message()
 
 
 func set_text(value: String):
 	text = value
-	update_message()
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
 
 
 func set_edited(value: bool):
 	is_edited = value
-	update_message()
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
 
 
 func set_time(value: String):
@@ -89,7 +91,8 @@ func set_time(value: String):
 		time = "00:00"
 	else:
 		time = value
-	update_message()
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
 
 
 #################### СИГНАЛЫ ####################

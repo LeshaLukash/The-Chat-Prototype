@@ -9,10 +9,15 @@ const SENDER_MAX_LENGTH := 40	# Макс. длина имени (в символ
 # Разбить большую строку на строки поменьше (без переносов!)
 func format_line(line: String, line_max_length: int, line_font: DynamicFont) -> Array:
 	var result := []
+	# Строка разбивается на массив из отдельных слов 
 	var line_words: PoolStringArray = line.split(' ')
+	var last_word_idx: int = get_array_last_idx(line_words)
+	print(line_words)
 	var str_tmp := "" # Хранит промежуточные этапы разбиения
 	
-	for word in line_words:
+	# Перебираем все слова в строке
+	for word_idx in line_words.size():
+		var word: String = line_words[word_idx]
 		
 		# Если текущее слово сликом длинное (вероятно, спам букв)
 		if word.length() >= WORD_MAX_LENGTH:
@@ -22,23 +27,40 @@ func format_line(line: String, line_max_length: int, line_font: DynamicFont) -> 
 				else:
 					result.append(str_tmp)
 					str_tmp = ch
-		# Пытаемся вместить слово с пробелом после него
+		
+		# Пытаемся пристроить слово в текущую строку, разместив после него пробел
+		# если слово пустое - значит, на его месте должен быть пробел
+		# шутка в том, что пустое слово поставится вместе с пробелом, которым оно и должно быть!
 		elif get_line_pixel_length(str_tmp + word + ' ', line_font) <= line_max_length:
+			print("Слово " + word + " влезает в текущую строку, добавляю!")
 			str_tmp += word + ' '
-		# Пытаемся вместить слово без пробела после него
-		# Слово последним будет в этой строке, поэтому после отдаём её
+		
+		# Если влезает только слово, без пробела - смотрим, является ли само слово пробелом
+		# от этого зависит конец текущей и начало след. строки
 		elif get_line_pixel_length(str_tmp + word, line_font) <= line_max_length:
-			str_tmp += word
+			if word != '':
+				print("Слово " + word + " влезает в текущую строку но без пробела, добавляю!")
+				str_tmp += word
+				result.append(str_tmp)
+				str_tmp = ""
+			else:
+				result.append(str_tmp)
+				str_tmp = " "
+		
+		# Если слово никак не влезает - добавлем имеющуюся строку в результат
+		# а рабочую строку перезаписываем словом, которое не влезло
+		elif get_line_pixel_length(str_tmp + word, line_font) > line_max_length:
 			result.append(str_tmp)
-			str_tmp = ""
-		# Если даже и слово не влазит - оставляем его для новой строки
-		else:
-			result.append(str_tmp.trim_suffix(' '))
 			str_tmp = word + ' '
 		
-		# Не забываем забрать незаконченые строки
-		if word == line_words[-1]:
-			result.append(str_tmp.trim_suffix(' '))
+		# Если слово было последним - добавляю остатки str_tmp как новую строку
+		if word_idx == last_word_idx:
+			str_tmp = str_tmp.trim_suffix(" ")
+			# Пустые строки лучше не добавлять - на их месте 
+			# могут возникнуть переносы при форматировании текста
+			if str_tmp != "":
+				result.append(str_tmp)
+
 	print("format_line: " + str(result))
 	return result
 
@@ -48,24 +70,48 @@ func format_text(text: String, line_max_length: int, text_font: DynamicFont) -> 
 	if text == "":
 		return text
 	
+	print("text(format_text): " + text.c_escape())
 	var result := ""
+	
+	# Анализируем ИСХОДНЫЙ текст - набор строк, разбитых переносами.
+	# Разбиваем текст на строки и перебираем их
+	# (если строка одна, то смотрим лишь её)
 	var text_lines: PoolStringArray = text.split('\n')
-
-	for line in text_lines:
+	var last_line_idx: int = get_array_last_idx(text_lines)
+	print(text_lines)
+	
+	for line_idx in text_lines.size():
+		var line: String = text_lines[line_idx]
 		# Если текущая строка не слишком длинная
 		if get_line_pixel_length(line, text_font) <= line_max_length:
+			print("Рассматриваю строку " + line.c_escape() + ", она не длинная")
 			result += line
+			
+			# Если строка не последняя - после неё будет перенос!
+			if line_idx != last_line_idx:
+				result += '\n'
+		
 		# Если строка слишком длинная
-		else:
+		else: 
+			print("Рассматриваю строку " + line.c_escape() + ", она длинная!!")
+			# Разбиваем строку на подстроки
 			var line_formatted: Array = format_line(line, line_max_length, text_font)
-			for string in line_formatted:
+			var last_string_idx: int = get_array_last_idx(line_formatted)
+			
+			for str_idx in line_formatted.size():
+				var string: String = line_formatted[str_idx]
 				result += string
-				if string != line_formatted[-1]:
+				
+				# Если подстрока не последняя - после неё будет перенос!
+				if str_idx != last_string_idx:
 					result += '\n'
 
 	print("format_text: " + result.c_escape())
 	return result
 
+
+func get_array_last_idx(a: Array):
+	return a.size() - 1
 
 # Получить длину строки, в пикселях
 func get_line_pixel_length(string: String, font: DynamicFont) -> int:
