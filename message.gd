@@ -30,9 +30,20 @@ export (String) var time = "00:00" setget set_time
 export (bool) var is_edited = false setget set_edited
 # Маркер, является ли сообщение ответом "игрока"
 export (bool) var is_player_reply = false
-
+# Маркер, скрыть или показать имя отправителя
+export (bool) var is_sender_name_visible = true setget set_sender_name_visible
 # Текстура аватарки
-var avatar_texture
+export (StreamTexture) var avatar_texture = AvatarsDB.get_avatar("default")
+
+
+# Задать содержимое сообщения
+func init_message(_sender: String, _text: String, _time: String):
+	sender = _sender
+	text = _text
+	time = _time
+	avatar_texture = AvatarsDB.get_avatar(_sender)
+	update_message()
+
 
 # Обновить содержимое сообщения
 func update_message() -> void:
@@ -41,17 +52,29 @@ func update_message() -> void:
 	var text_formatted: String = $TextFormatter.format_text(text, LINE_MAX_LENGTH, text_font)
 	var time_formatted: String = TIME_TAGS_START + get_time_status() + TIME_TAGS_END
 	
-	# Обновляем содержимое сообщения и подгоняем его под размеры
-	get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' + time_formatted
+	# Обновляем содержимое сообщения и подгоняем его под текст
+	get_node("%Avatar").texture_normal = avatar_texture
+	
+	if is_sender_name_visible:
+		get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' +\
+				time_formatted
+	else:
+		get_node("%Text").bbcode_text = text_formatted + '\n' + time_formatted
+	
 	get_node("%Text").rect_min_size.x = calc_message_width(text_formatted)
 	get_node("%Text").rect_size.x = get_node("%Text").rect_min_size.x
 	get_node("%Panel").rect_size.x = 0.0
-	update()
-	
+
 
 # Вычислить ширину сообщения, в зависимости от размера содержимого
 func calc_message_width(text_formatted: String) -> int:
-	var sender_length: int = $TextFormatter.get_line_pixel_length(sender, sender_font)
+	
+	var sender_length: int
+	if is_sender_name_visible:
+		sender_length = $TextFormatter.get_line_pixel_length(sender, sender_font)
+	else:
+		sender_length = 0
+	
 	var text_longest_line: String = $TextFormatter.get_longest_text_line(text_formatted, text_font)
 	var text_length: int = $TextFormatter.get_line_pixel_length(text_longest_line, text_font)
 	var time_length: int = $TextFormatter.get_line_pixel_length(get_time_status(), time_font)
@@ -97,6 +120,13 @@ func set_time(value: String):
 		time = value
 	if get_node_or_null("TextFormatter") != null:
 		update_message()
+
+
+func set_sender_name_visible(value: bool):
+	is_sender_name_visible = value
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
+
 
 
 #################### СИГНАЛЫ ####################
