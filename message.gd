@@ -44,6 +44,9 @@ func update_message() -> void:
 	# Обновляем содержимое сообщения и подгоняем его под размеры
 	get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' + time_formatted
 	get_node("%Text").rect_min_size.x = calc_message_width(text_formatted)
+	get_node("%Text").rect_size.x = get_node("%Text").rect_min_size.x
+	get_node("%Panel").rect_size.x = 0.0
+	update()
 	
 
 # Вычислить ширину сообщения, в зависимости от размера содержимого
@@ -55,6 +58,7 @@ func calc_message_width(text_formatted: String) -> int:
 	
 	var length_to_compare := [sender_length, text_length, time_length]
 	var panel_width := int(clamp(length_to_compare.max(), 0, LINE_MAX_LENGTH))
+	print(panel_width)
 	return panel_width
 
 

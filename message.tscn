@@ -6,23 +6,24 @@
 [ext_resource path="res://text_formatter.gd" type="Script" id=4]
 
 [node name="Message" type="MarginContainer"]
-margin_right = 356.0
+margin_right = 117.0
 margin_bottom = 113.0
 rect_pivot_offset = Vector2( -513, -236 )
 script = ExtResource( 2 )
-text = "Пусть бегут неуклюже
-пешеходы по лужам а
-"
+__meta__ = {
+"_edit_group_": true,
+"_edit_lock_": true
+}
 
 [node name="HBoxContainer" type="HBoxContainer" parent="."]
-margin_right = 356.0
-margin_bottom = 212.0
+margin_right = 243.0
+margin_bottom = 113.0
 
 [node name="Avatar" type="TextureButton" parent="HBoxContainer"]
 unique_name_in_owner = true
-margin_top = 172.0
+margin_top = 73.0
 margin_right = 40.0
-margin_bottom = 212.0
+margin_bottom = 113.0
 rect_min_size = Vector2( 40, 40 )
 size_flags_vertical = 8
 texture_normal = ExtResource( 3 )
@@ -31,9 +32,8 @@ expand = true
 [node name="Panel" type="PanelContainer" parent="HBoxContainer"]
 unique_name_in_owner = true
 margin_left = 44.0
-margin_right = 356.0
-margin_bottom = 212.0
-rect_min_size = Vector2( 50, 0 )
+margin_right = 243.0
+margin_bottom = 113.0
 size_flags_horizontal = 3
 theme = ExtResource( 1 )
 
@@ -41,21 +41,15 @@ theme = ExtResource( 1 )
 unique_name_in_owner = true
 margin_left = 7.0
 margin_top = 7.0
-margin_right = 305.0
-margin_bottom = 205.0
-rect_min_size = Vector2( 290, 0 )
+margin_right = 192.0
+margin_bottom = 106.0
+rect_min_size = Vector2( 185, 0 )
 rect_clip_content = false
 bbcode_enabled = true
 bbcode_text = "[color=silver][font=fonts/arial_sender_name.tres]Отправитель[/font][/color]
-Пусть бегут неуклюже
-пешеходы по лужам а
-
 
 [right][font=fonts/arial_time.tres]00:00[/font][/right]"
 text = "Отправитель
-Пусть бегут неуклюже
-пешеходы по лужам а
-
 
 00:00"
 fit_content_height = true
