@@ -12,7 +12,7 @@ func format_line(line: String, line_max_length: int, line_font: DynamicFont) -> 
 	# Строка разбивается на массив из отдельных слов 
 	var line_words: PoolStringArray = line.split(' ')
 	var last_word_idx: int = get_array_last_idx(line_words)
-	print(line_words)
+	
 	var str_tmp := "" # Хранит промежуточные этапы разбиения
 	
 	# Перебираем все слова в строке

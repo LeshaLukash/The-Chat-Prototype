@@ -28,20 +28,26 @@ export (String) var time = "00:00" setget set_time
 
 # Маркер сообщения статусом "изменено"
 export (bool) var is_edited = false setget set_edited
-# Маркер, является ли сообщение ответом "игрока"
-export (bool) var is_player_reply = false
+# Маркер, отображать сообщение слева или справа от края экрана
+export (bool) var place_to_right = false setget set_place_to_right
 # Маркер, скрыть или показать имя отправителя
-export (bool) var is_sender_name_visible = true setget set_sender_name_visible
+export (bool) var show_sender_name = true setget set_show_sender_name
+# Маркер, отображать или скрыть аватарку
+export (bool) var show_avatar = true setget set_show_avatar
 # Текстура аватарки
 export (StreamTexture) var avatar_texture = AvatarsDB.get_avatar("default")
 
 
 # Задать содержимое сообщения
-func init_message(_sender: String, _text: String, _time: String):
-	sender = _sender
-	text = _text
-	time = _time
-	avatar_texture = AvatarsDB.get_avatar(_sender)
+func init_message(params: Dictionary):
+	sender = params.sender
+	avatar_texture = AvatarsDB.get_avatar(sender)
+	text = params.text
+	time = params.time
+	is_edited = params.is_edited
+	place_to_right = params.place_to_right
+	show_sender_name = params.show_sender_name
+	show_avatar = params.show_avatar
 	update_message()
 
 
@@ -54,8 +60,9 @@ func update_message() -> void:
 	
 	# Обновляем содержимое сообщения и подгоняем его под текст
 	get_node("%Avatar").texture_normal = avatar_texture
-	
-	if is_sender_name_visible:
+	get_node("%Avatar").set_self_modulate(Color(1, 1, 1, float(show_avatar)))
+
+	if show_sender_name == true :
 		get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' +\
 				time_formatted
 	else:
@@ -70,7 +77,7 @@ func update_message() -> void:
 func calc_message_width(text_formatted: String) -> int:
 	
 	var sender_length: int
-	if is_sender_name_visible:
+	if show_sender_name == true:
 		sender_length = $TextFormatter.get_line_pixel_length(sender, sender_font)
 	else:
 		sender_length = 0
@@ -81,7 +88,6 @@ func calc_message_width(text_formatted: String) -> int:
 	
 	var length_to_compare := [sender_length, text_length, time_length]
 	var panel_width := int(clamp(length_to_compare.max(), 0, LINE_MAX_LENGTH))
-	print(panel_width)
 	return panel_width
 
 
@@ -122,11 +128,22 @@ func set_time(value: String):
 		update_message()
 
 
-func set_sender_name_visible(value: bool):
-	is_sender_name_visible = value
+func set_show_sender_name(value: bool):
+	show_sender_name = value
 	if get_node_or_null("TextFormatter") != null:
 		update_message()
 
+
+func set_show_avatar(value: bool):
+	show_avatar = value
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
+		
+
+func set_place_to_right(value: bool):
+	place_to_right = value
+	if get_node_or_null("TextFormatter") != null:
+		update_message()
 
 
 #################### СИГНАЛЫ ####################
