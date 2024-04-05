@@ -1,6 +1,6 @@
 tool
 extends ScrollContainer
-# Окно чата
+# ОКНО ЧАТА
 # Это вертикальный список с прокруткой всех добавленых сообщений
 
 const GROUP_MESSAGES_NAME := "messages"
@@ -31,23 +31,27 @@ func load_chat(file_path: String = chat_text_file) -> void:
 		printerr("Файл %s отсутствует!" %file_path)
 		return
 	f.open(file_path, File.READ)
+	
 	while f.get_position() < f.get_len():
 		var line = f.get_line()
 		
+		# Угловыми скобками в чат вносят панели, отображающие дату отправления
 		if line.begins_with('<') and line.ends_with('>'):
 			add_info_panel(line)
+		# В остальных случаях - перед нами сообщение
 		else:
 			# Считываем строку с параметрами сообщения
-			var msg_params: Array = extract_params(line)
+			var params: Dictionary = extract_params(line)
+			
 			# Если параметры не загрузились, или после них нет строки с текстом
-			if msg_params.empty() or f.eof_reached():
+			if params.empty() or f.eof_reached():
 				clear_chat()
 				printerr("Критическая ошибка при чтении %s, чат не загружен!" %file_path)
 				return
-		
-			var msg_line: String = f.get_line().c_unescape()
+
+			params.text = f.get_line().c_unescape()
 			var is_last_msg: bool = f.eof_reached()
-			add_message(msg_line, msg_params, is_last_msg)
+			add_message(params, is_last_msg)
 	f.close()
 
 
@@ -58,46 +62,32 @@ func add_info_panel(line: String) -> void:
 	info_label_text = info_label_text.trim_suffix('>')
 	info_label.set_text(info_label_text)
 	$MessagesContainer.add_child(info_label)
+	current_sender = ""
+	previous_sender = ""
 
 
 # Добавить в чат сообщение
 var current_sender: String	# Имя отправителя текущего сообщения
 var previous_sender: String	# Имя отправителя предыдущего сообщения
-var msg: Message
-var previous_msg: Message
+var current_msg: Message	# Обрабатываемое сообщение
+var previous_msg: Message	# Обработанное ранее сообщение
 var previous_msg_edited := false
 
-func add_message(text: String, params: Array, is_last_msg := false) -> void:
-	msg = message_scene.instance()
-	msg.add_to_group(GROUP_MESSAGES_NAME)
+func add_message(params: Dictionary, is_last_msg := false) -> void:
+	# Добавляем в ChatContainer незаполненную болванку Message.tscn
+	current_msg = message_scene.instance()
+	# Добавление каждого сообщения в группу упрощает
+	# их массовую обработку (например, удаление)
+	current_msg.add_to_group(GROUP_MESSAGES_NAME)
 	
-	# Проверка, является ли автор прошлого сообщения автором текущего сообщения
-	# Если так, то в последующих его сообщениях скрываем имя и аватарку
-	current_sender = params[0]
-	if previous_sender == current_sender:
-		previous_msg.avatar_texture = AvatarsDB.get_avatar("empty")
-		params[0] = ""
-		previous_msg_edited = true
-	elif previous_msg_edited:
-		previous_msg.message_sender = ""
-		previous_msg.update_message()
-		previous_msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
-		previous_msg_edited = false
-	previous_sender = current_sender
-	previous_msg = msg
+	# Если сообщение нужно сдвинуть вправо
+	if params.place_to_right == true:
+		current_msg.set_h_size_flags(SIZE_SHRINK_END)
+		params.show_avatar = false
+		params.show_sender_name = false
 
-	msg.init_message(text, params)
-	msg.update_message()
-	
-	# Если человек последним отправил несколько сообщений подряд - на его последнее сообщение
-	# возвращаем его родную аватарку (без этого будет дефолтной)
-	if is_last_msg:
-		msg.avatar_texture = AvatarsDB.get_avatar(previous_sender)
-	
-	$MessagesContainer.add_child(msg)
-	msg.update_margins()
-	
-
+	current_msg.init_message(params)
+	$MessagesContainer.add_child(current_msg)
 
 # Удалить все сообщения из чата
 func clear_chat() -> void:
@@ -109,25 +99,28 @@ func clear_chat() -> void:
 		message.queue_free()
 
 
-# Извлечь из строки параметры
-func extract_params(string: String) -> Array:
-	var result := []
+# Извлечь из строки параметры сообщения
+func extract_params(string: String) -> Dictionary:
+	var result := {
+		"sender": "default",
+		"text": "",
+		"time": "",
+		"is_edited": false,
+		"place_to_right": false,
+		"show_sender_name": true,
+		"show_avatar": true
+	}
 	
 	var params := string.split(',')
 	# Если строка с параметрами имеет не 4 параметра - сбрасыываем чат
 	if params.size() != PARAMS_COUNT:
 		printerr("Ошибка при чтении строки с параметрами!")
-		return result
+		return {}
 	
-	var msg_sender: String = params[0]	#msg_sender - имя отправителя
-	var msg_time: String = params[1] # msg_time - время отправки
-	var is_edited := bool(int(params[2])) # is_edited - метка редактирования сообщения
-	var is_player_reply := bool(int(params[3]))  # is_reply - метка того, кто отправитель
-	
-	result.append(msg_sender)
-	result.append(msg_time)
-	result.append(is_edited)
-	result.append(is_player_reply)
+	result.sender = params[0]
+	result.time = params[1]
+	result.is_edited = bool(int(params[2]))
+	result.place_to_right = bool(int(params[3]))
 	
 	return result
 	

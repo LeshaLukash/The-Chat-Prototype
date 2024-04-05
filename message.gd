@@ -28,14 +28,12 @@ export (String) var time = "00:00" setget set_time
 
 # Маркер сообщения статусом "изменено"
 export (bool) var is_edited = false setget set_edited
-# Маркер, отображать сообщение слева или справа от края экрана
-export (bool) var place_to_right = false setget set_place_to_right
 # Маркер, скрыть или показать имя отправителя
 export (bool) var show_sender_name = true setget set_show_sender_name
 # Маркер, отображать или скрыть аватарку
 export (bool) var show_avatar = true setget set_show_avatar
 # Текстура аватарки
-export (StreamTexture) var avatar_texture = AvatarsDB.get_avatar("default")
+export (StreamTexture) var avatar_texture
 
 
 # Задать содержимое сообщения
@@ -45,7 +43,6 @@ func init_message(params: Dictionary):
 	text = params.text
 	time = params.time
 	is_edited = params.is_edited
-	place_to_right = params.place_to_right
 	show_sender_name = params.show_sender_name
 	show_avatar = params.show_avatar
 	update_message()
@@ -136,12 +133,6 @@ func set_show_sender_name(value: bool):
 
 func set_show_avatar(value: bool):
 	show_avatar = value
-	if get_node_or_null("TextFormatter") != null:
-		update_message()
-		
-
-func set_place_to_right(value: bool):
-	place_to_right = value
 	if get_node_or_null("TextFormatter") != null:
 		update_message()
 
