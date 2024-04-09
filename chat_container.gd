@@ -74,20 +74,43 @@ var previous_msg: Message	# Обработанное ранее сообщени
 var previous_msg_edited := false
 
 func add_message(params: Dictionary, is_last_msg := false) -> void:
-	# Добавляем в ChatContainer незаполненную болванку Message.tscn
 	current_msg = message_scene.instance()
-	# Добавление каждого сообщения в группу упрощает
-	# их массовую обработку (например, удаление)
-	current_msg.add_to_group(GROUP_MESSAGES_NAME)
+	current_msg.add_to_group(GROUP_MESSAGES_NAME) # Добавляю в группу для упрощений массовой обработки
 	
-	# Если сообщение нужно сдвинуть вправо
+	# ОБРАБОТКА ПОСЛЕДОВАТЕЛЬНОСТИ СООБЩЕНИЙ
+	# Если сообщение от лица того, от кого мы залогинены в системе
 	if params.place_to_right == true:
-		current_msg.set_h_size_flags(SIZE_SHRINK_END)
+		current_msg.set_h_size_flags(SIZE_SHRINK_END) # Сдвигаем к правому краю
 		params.show_avatar = false
 		params.show_sender_name = false
+		
+		# Если на стыке двух сообщений
+		if previous_msg_edited == true:
+			previous_msg.show_sender_name = false
+		previous_msg_edited = false
+	
+	# Если есть предыдущее сообщение
+	elif previous_msg != null:
+		# Если автор предыдущего сообщения тот же, что и текущего
+		if previous_msg.sender == params.sender:
+			# У первого сообщения отключаем только аватарку
+			previous_msg.show_avatar = false
+			
+			# У остальных - ещё и имя
+			if previous_msg_edited == false:
+				previous_msg_edited = true
+			else:
+				previous_msg.show_sender_name = false
+			
+			# Если сообщение последнее - отключаем имя у текущего сообщения!
+			if is_last_msg:
+				params.show_sender_name = false
+	
+	previous_msg = current_msg
 
 	current_msg.init_message(params)
 	$MessagesContainer.add_child(current_msg)
+
 
 # Удалить все сообщения из чата
 func clear_chat() -> void:

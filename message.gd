@@ -59,7 +59,7 @@ func update_message() -> void:
 	get_node("%Avatar").texture_normal = avatar_texture
 	get_node("%Avatar").set_self_modulate(Color(1, 1, 1, float(show_avatar)))
 
-	if show_sender_name == true :
+	if show_sender_name == true:
 		get_node("%Text").bbcode_text = sender_formatted + '\n' + text_formatted + '\n' +\
 				time_formatted
 	else:
