@@ -3,7 +3,7 @@ extends Control
 # Окно чата
 
 const FADE_MAX := 150 				# Макс. затенение экрана сообщений
-const DRAG_LENGTH := 10				# Макс. длина свайпа, после чего проверяется его назначение
+const DRAG_LENGTH := 3				# Макс. длина свайпа, после чего проверяется его назначение
 const INERTIA_SCROLL_SPEED := 0.5	# Скорость прокрутки сообщений после того, как игрок отпустил палец
 const INERTIA_HIDDEN_SCROLL_SPEED := 3
 
@@ -62,7 +62,7 @@ func _input(event):
 				$SidePanel.set_panel_pos(event.relative.x)
 			elif not is_side_panel_visible():
 				$ChatContainer.scroll_messages(event.relative.y)
-				scroll_speed = round(event.speed.y * get_process_delta_time())
+				scroll_speed = event.speed.y * get_process_delta_time()
 		else:
 			drag_vector += event.relative
 
@@ -85,3 +85,10 @@ func fade_messages(weight: float) -> void:
 
 func _on_SidePanel_side_panel_dragged(weight: float):
 	fade_messages(weight)
+
+
+func _on_ChatContainer_item_rect_changed():
+	print("message updated")
+	for message in $ChatContainer.get_tree().get_nodes_in_group($ChatContainer.GROUP_MESSAGES_NAME):
+		message.update_message()
+	

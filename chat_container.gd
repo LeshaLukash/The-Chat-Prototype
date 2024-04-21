@@ -16,6 +16,8 @@ func _ready():
 	load_chat(chat_text_file)
 
 
+
+
 # Прокрутить список сообщений на pos-пикселей
 func scroll_messages(pos: float) -> void:
 	scroll_vertical -= int(floor(pos)) 
@@ -84,7 +86,8 @@ func add_message(params: Dictionary, is_last_msg := false) -> void:
 		params.show_avatar = false
 		params.show_sender_name = false
 		
-		# Если на стыке двух сообщений
+		# Если предыдущее сообщение было отредактировано во второй половине цикла
+		# то отключаем у него отображение имени отправителя!
 		if previous_msg_edited == true:
 			previous_msg.show_sender_name = false
 		previous_msg_edited = false

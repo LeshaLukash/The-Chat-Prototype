@@ -5,7 +5,7 @@ signal option_pressed
 signal about_pressed
 signal side_panel_dragged(weight)
 
-const PANEL_POS_HIDED := -360
+const PANEL_POS_HIDED := -430
 const PANEL_POS_SHOWED := 0
 
 

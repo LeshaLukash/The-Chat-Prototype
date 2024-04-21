@@ -28,7 +28,6 @@ margin_right = 40.0
 margin_bottom = 113.0
 rect_min_size = Vector2( 40, 40 )
 size_flags_vertical = 8
-texture_normal = ExtResource( 3 )
 expand = true
 
 [node name="Panel" type="PanelContainer" parent="HBoxContainer"]
